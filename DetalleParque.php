@@ -1,41 +1,57 @@
-    <?php
-    session_start();
-    // --- INICIO DE LÓGICA DEL PARQUE ---
-    require_once 'bd/conexion.php';
 
-    $id = $_GET['id'] ?? 0;
+<?php
+session_start();
 
-    $stmt = $conn->prepare("
-        SELECT *
-        FROM parques
-        WHERE id = ?
-    ");
-    if (!$stmt) {
-    die("Error preparando consulta: " . $conn->error);
+require_once __DIR__ . '/config/firebase.php';
+
+$id = trim((string) ($_GET['id'] ?? ''));
+
+if ($id === '') {
+    http_response_code(400);
+    exit('No se proporcionó un parque.');
 }
 
-$stmt->bind_param("i", $id);
-$stmt->execute();
+try {
+    $database = obtenerFirebaseDatabase();
 
-$resultado = $stmt->get_result();
-$parque = $resultado->fetch_assoc();
+    // Firebase utiliza identificadores de texto.
+    $parque = $database
+        ->getReference('parques')
+        ->getChild($id)
+        ->getValue();
 
-$stmt->close();
-    if(!$parque)
-    {
-        die("Parque no encontrado");
+    if (!is_array($parque)) {
+        http_response_code(404);
+        exit('Parque no encontrado.');
     }
 
-    $porcentaje = 0;
+    $parque['id'] = $id;
 
-    if($parque['precio'] > 0)
-    {
-        $porcentaje = ($parque['recaudado'] / $parque['precio']) * 100;
-        // Evita que pase del 100%
-        $porcentaje = min($porcentaje, 100);
-    }
-    // --- FIN DE LÓGICA DEL PARQUE ---
-    ?>
+} catch (Throwable $e) {
+    error_log('Error consultando Firebase: ' . $e->getMessage());
+
+    http_response_code(500);
+    exit('No se pudo consultar el parque.');
+}
+
+// Datos provenientes de Firebase
+$nombre = $parque['nombre'] ?? 'Parque sin nombre';
+$descripcion = $parque['descripcion'] ?? '';
+$ubicacion = $parque['ubicacion'] ?? '';
+
+$meta = (float) ($parque['metaDonaciones'] ?? 0);
+$recaudado = (float) ($parque['montoRecaudado'] ?? 0);
+
+// Calcular porcentaje de donaciones
+$porcentaje = 0;
+
+if ($meta > 0) {
+    $porcentaje = min(
+        100,
+        max(0, ($recaudado / $meta) * 100)
+    );
+}
+?>
 
     <!DOCTYPE html>
     <html lang="es">
@@ -44,7 +60,7 @@ $stmt->close();
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <link rel="stylesheet" href="Css/Style.css">
         <link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
-        <title><?php echo htmlspecialchars($parque['titulo'] ?? 'Detalle'); ?> - Detalle</title>
+        <title><?php echo htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8'); ?> - Detalle</title>
 
         <style>
             /* Estilos del menú de perfil flotante */
@@ -407,17 +423,17 @@ $stmt->close();
         </div>
 
         <div class="detalle-parque-contenedor">
-            <h1><?php echo htmlspecialchars($parque['titulo'] ?? ''); ?></h1>
+            <h1><?php echo htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8'); ?></h1>
             
             <p class="direccion">
-                <i class='bx bx-map'></i> <?php echo htmlspecialchars($parque['direccion'] ?? ''); ?>
-            </p>
+   <i class='bx bx-map'></i>
+    <?php echo htmlspecialchars($ubicacion, ENT_QUOTES, 'UTF-8'); ?>            </p>
 
             <p class="info-adicional">
-                <?php echo htmlspecialchars($parque['info2'] ?? ''); ?>
+                <?php echo htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8'); ?>
             </p>
 
-            <p><strong>Meta:</strong> $<?php echo number_format($parque['precio'] ?? 0, 2); ?></p>
+            <<p><strong>Meta:</strong> $<?php echo number_format($meta, 2); ?></p>
             <p><strong>Progreso:</strong> <?php echo round($porcentaje); ?>%</p>
 
             <div class="barra-contenedor">
@@ -425,23 +441,7 @@ $stmt->close();
             </div>
 
            <div class="paypal-container">
-
-   <?php
-    $id_parque = $parque['id'] ?? 0;
-    $titulo_parque = urlencode($parque['titulo'] ?? '');
-    $precio_parque = $parque['precio'] ?? 0;
-?>
-
-<a href="pago.php?id=<?php echo $id_parque; ?>&nombre=<?php echo $titulo_parque; ?>&precio=<?php echo $precio_parque; ?>" class="paypal-btn">
-        <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png">
-        Donar con PayPal
-    </a>
-
-    <a href="PagoTarj.php?id=<?php echo $id_parque; ?>" class="donacion-btn">
-        <i class='bx bx-heart'></i>
-        Donación Directa
-    </a>
-
+    <p>Las donaciones estarán disponibles próximamente.</p>
 </div>
 
             <?php if(!empty($parque['ubicacion'])): ?>

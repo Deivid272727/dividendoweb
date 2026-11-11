@@ -1,55 +1,35 @@
+
 <?php
 session_start();
-require_once 'bd/conexion.php';
 
-$municipio = strtolower(
-    str_replace(' ', '', $_GET['municipio'] ?? '')
-);
+require_once __DIR__ . '/config/firebase.php';
+
+$municipio = trim($_GET['municipio'] ?? '');
 $parques = [];
-$stmt=$conn->prepare(
-    "SELECT * FROM parques
-    WHERE LOWER(REPLACE(municipio, ' ', '')) = ? 
-    ");
-if (!$stmt) {
-    die("Error preparando consulta: " . $conn->error);
-}
-
-$stmt->bind_param("s", $municipio);
-$stmt->execute();
-
-$resultado = $stmt->get_result();
-$parques = $resultado->fetch_all(MYSQLI_ASSOC);
-
-$stmt->close();
-
-?>
- <!-- -->
-<?php
-
-$municipio = $_GET['municipio'] ??'';
-
-$parques = [];
+$errorParques = '';
 
 try {
+    $database = obtenerFirebaseDatabase();
 
-    $stmt = $conn->prepare("
-        SELECT *
-        FROM parques
-        WHERE LOWER(REPLACE(municipio,' ','')) = ?
-    ");
+    $datos = $database
+        ->getReference('parques')
+        ->getValue();
 
-    $stmt->bind_param("s", $municipio);
-$stmt->execute();
+    foreach (($datos ?? []) as $firebaseId => $parque) {
+        if (!is_array($parque)) {
+            continue;
+        }
 
-$resultado = $stmt->get_result();
-$parques = $resultado->fetch_all(MYSQLI_ASSOC);
+        $parque['id'] = $parque['id'] ?? $firebaseId;
 
-$stmt->close();
+        // Por ahora conservamos todos los parques.
+        // Después agregaremos el filtro por municipio.
+        $parques[] = $parque;
+    }
 
-} catch(PDOException $e) {
-
-    echo "Error: " . $e->getMessage();
-
+} catch (Throwable $e) {
+    $errorParques = 'No se pudieron cargar los parques.';
+    error_log('Error consultando parques: ' . $e->getMessage());
 }
 ?>
 
@@ -455,25 +435,25 @@ $stmt->close();
 
     <div class="parque-img">
 
-        <img src="imagenes/idk.jpg" alt="">
+        <img  src="<?php echo htmlspecialchars($parque['imagenUrl'] ?? 'imagenes/idk.jpg', ENT_QUOTES, 'UTF-8'); ?>"
+    alt="Imagen del parque">
 
         <div class="parque-etiqueta">
-            🌳 <?php echo ucfirst($parque['municipio']); ?>
+            <?php echo htmlspecialchars($parque['ubicacion'] ?? 'Ubicación no disponible', ENT_QUOTES, 'UTF-8'); ?>
         </div>
 
     </div>
 
     <div class="parque-body">
 
-        <h2><?php echo $parque['titulo']; ?></h2>
-
+        <h2><?php echo htmlspecialchars($parque['nombre'] ?? 'Parque sin nombre', ENT_QUOTES, 'UTF-8'); ?></h2>
         <p>
             <i class='bx bx-map'></i>
-            <?php echo $parque['direccion']; ?>
+            <?php echo htmlspecialchars($parque['ubicacion'] ?? 'Ubicación no disponible', ENT_QUOTES, 'UTF-8'); ?>
         </p>
 
-        <a href="DetalleParque.php?id=<?php echo $parque['id']; ?>">
-            Ver más
+        <a href="DetalleParque.php?id=<?php echo urlencode((string)$parque['id']); ?>">
+    Ver más
         </a>
 
     </div>

@@ -1,0 +1,6 @@
+{
+    "require": {
+        "kreait/firebase-php": "7.24.1",
+        "firebase/php-jwt": "7.0.2"
+    }
+}
