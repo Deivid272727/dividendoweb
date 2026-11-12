@@ -458,3 +458,146 @@ body.dark .switch::before{
 #container.active .toggle-right{
     transform: translateX(200%);
 }
+
+/* ===== CORRECCIONES DIVIDENDO LOGIN ===== */
+
+/* Contenedor principal */
+#container {
+    width: 900px;
+    max-width: calc(100% - 40px);
+    min-height: 560px;
+}
+
+/* Distribución de formularios */
+#container form {
+    padding: 25px 40px;
+    gap: 8px;
+}
+
+#container form h1 {
+    font-size: 30px;
+    text-align: center;
+    line-height: 1.2;
+    margin-bottom: 8px;
+}
+
+/* Campos de texto */
+#container input:not([type="checkbox"]) {
+    width: 100%;
+    padding: 14px 16px;
+    margin: 5px 0;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+#container input:focus {
+    outline: 2px solid #21f074;
+    outline-offset: 1px;
+}
+
+/* Checkbox del aviso de privacidad */
+#container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0 8px 0 0;
+    accent-color: #21f074;
+    cursor: pointer;
+}
+
+#container form table {
+    margin: 8px 0;
+}
+
+#container form table td {
+    vertical-align: middle;
+}
+
+/* Botones */
+#container button {
+    background-color: #21f074;
+    padding: 13px 35px;
+    min-width: 170px;
+    transition: background-color 0.3s ease;
+}
+
+#container button:hover {
+    background-color: #18c95f;
+}
+
+#container button.hidden {
+    background-color: transparent;
+}
+
+#container button.hidden:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Espacio del botón de Google */
+#container .social-icons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 8px 0;
+}
+
+/* Panel verde */
+#container .toggle {
+    background: #35d832;
+    transition: transform 0.6s ease-in-out;
+}
+
+/* Texto de los paneles */
+#container .toggle-panel h1 {
+    font-size: 32px;
+    line-height: 1.25;
+}
+
+#container .toggle-panel p {
+    line-height: 1.6;
+}
+
+/* Pantallas pequeñas */
+@media (max-width: 700px) {
+    .sidebar {
+        display: none;
+    }
+
+    .home,
+    .sidebar.close ~ .home {
+        left: 0;
+        width: 100%;
+        min-height: 100vh;
+        height: auto;
+        padding: 20px 10px;
+    }
+
+    #container {
+        max-width: 100%;
+        min-height: 560px;
+    }
+
+    #container form {
+        padding: 15px;
+    }
+
+    #container form h1 {
+        font-size: 22px;
+    }
+
+    #container .toggle-panel {
+        padding: 0 12px;
+    }
+
+    #container .toggle-panel h1 {
+        font-size: 20px;
+    }
+
+    #container .toggle-panel p {
+        font-size: 12px;
+    }
+
+    #container button {
+        min-width: 0;
+        padding: 11px 18px;
+    }
+}

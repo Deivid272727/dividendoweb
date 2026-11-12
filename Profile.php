@@ -156,78 +156,12 @@ $stmt->execute([$id_usuario]);
     }
     input[type="file"] { display: none; }
 
-    .busqueda-contenedor{
-    width:100%;
-    display:flex;
-    justify-content:center;
-    margin-top:20px;
-    margin-bottom:30px;
-}
-
-.busqueda-contenedor form{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    background:#1b2838;
-    padding:15px 20px;
-    border-radius:15px;
-    width:500px;
-    box-shadow:0 0 10px rgba(0,0,0,0.3);
-}
-
-.busqueda-contenedor i{
-    color:white;
-    font-size:22px;
-}
-
-.busqueda-contenedor input{
-    flex:1;
-    border:none;
-    outline:none;
-    background:transparent;
-    color:white;
-    font-size:16px;
-}
-
-.busqueda-contenedor button{
-    border:none;
-    background:#00E676;
-    color:black;
-    padding:10px 18px;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:bold;
-    transition:0.3s;
-}
-
-.busqueda-contenedor button:hover{
-    transform:scale(1.05);
-}
 </style>
 
 
 
 </head>
 <body>
-<div class="busqueda-contenedor">
-
-    <form action="Search.php" method="GET">
-
-        <i class='bx bx-search'></i>
-
-        <input
-            type="text"
-            name="buscar"
-            placeholder="Buscar usuarios..."
-        >
-
-        <button type="submit">
-            Buscar
-        </button>
-
-    </form>
-
-</div>
 <nav class="sidebar close">
     <header>
         <div class="image-text">

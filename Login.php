@@ -84,7 +84,7 @@ if (isset($_POST['login_btn'])) {
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="EI=edge">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!--<script src="https://accounts.google.com/gsi/client" async defer></script> -->
 
 <!--================ CSS =============-->
 <link rel="stylesheet" href="Css/Login.css">
@@ -149,16 +149,16 @@ if (isset($_POST['login_btn'])) {
             <i class='bx bxs-tree-alt icon'></i>
                 
             
-                        <span class="text nav-text">Garcianos</span>
+                        <span class="text nav-text">Parques</span>
                     </a>
                                   <!-- Aqui estan los segmentos del sidebar-->
                                         </li>
             <ul class="menu-links">
                 <li class="nav-link">
-                    <a href="#">
+                    <!--<a href="#">
                         <i class="bx bx-heart icon"></i>
                         <span class="text nav-text">Santa chad</span>
-                    </a>
+                    </a>-->
 
                         <!-- nose-->
 
@@ -209,9 +209,9 @@ if (isset($_POST['login_btn'])) {
 
 <!-- Registrarse -->
     <div class = "container" id="container">
-      <div class="form-container sign-up">
-    <form action="login.php" method="POST">
-        <h1>Create Account</h1>
+     <div class="form-container sign-up">
+    <form id="firebase-register-form">
+        <h1>Crear una cuenta</h1>
         <div class="social-icons">
 
     <div id="g_id_onload"
@@ -226,7 +226,7 @@ if (isset($_POST['login_btn'])) {
     </div>
 
 </div>
-        <span>or use your email for registration</span>
+        <!--<span>or use your email for registration</span>-->
         
         <input type="text" name="name" placeholder="Name" required>
         <input type="email" name="email" placeholder="Email" required>
@@ -242,24 +242,24 @@ if (isset($_POST['login_btn'])) {
                 <td>Acepto el <a href="privacidad.php" target="_blank">Aviso de privacidad</a></td>
             </tr>
         </table>
-        <button type="submit" name="register_btn">Sign Up</button> 
+        <button type="submit" id="firebase-register-btn">Registrarse</button>
     </form>
 </div>
 
 <div class="form-container sign-in">
-    <form action="login.php" method="POST">
-        <h1>Sign In</h1>
+    <form id="firebase-login-form">
+        <h1>Inicio de sesión</h1>
         <div class="social-icons">
             <a href="#" class="icon"><i class="fa-brands fa-google.plus-g"></i></a>
         </div>
-        <span>or use your email password</span>
+        <!--<span>or use your email password</span> -->
         
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Password" required>
         
         <a href="PasswordForgot.php"> ¿Olvidaste tu contraseña?  </a>
 
-        <button type="submit" name="login_btn">Sign In</button> 
+        <button type="submit" id="firebase-login-btn">Iniciar Sesión</button> 
     </form>
 </div>
 
@@ -267,16 +267,16 @@ if (isset($_POST['login_btn'])) {
        <div class="toggle-container">
        <div class="toggle">
         <div class="toggle-panel toggle-left"> 
-            <h1> bIENVENIDO PLEBE </h1>
-            <p> No se papu ahi dice otra cosa </p>
-            <button class="hidden" id= "login"> Sign In</button>
+            <h1> Bienvenido a Dividendo </h1>
+            <p> Cuidar nuestros parques es tarea de todos </p>
+            <button class="hidden" id= "login"> Ya tengo cuenta</button>
             </div>
 
 
              <div class="toggle-panel toggle-right"> 
-            <h1> Ki ubo, Amiguito mio</h1>
-            <p> No se papu ahi dice otra cosa x2 </p>
-            <button class="hidden" id= "register"> Sign Up</button>
+            <h1> Bienvenido a Dividendo</h1>
+            <p> Pequeñas acciones, grandes cambios </p>
+            <button class="hidden" id= "register"> Registrar una cuenta</button>
             </div>
         </div>
     </div>
@@ -287,6 +287,7 @@ if (isset($_POST['login_btn'])) {
 
 
  <script src="script2.js"></script>
+ <script type="module" src="firebase-auth.js"></script>
 <script>
 
 function handleCredentialResponse(response)
