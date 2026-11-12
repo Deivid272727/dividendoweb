@@ -329,8 +329,8 @@ body.dark .ods-info a{
             </span>
 
             <div class="text header-text">
-                <span class="name">Y esta mafudada?</span>
-                <span class="profession">No se bro</span>
+                <span class="name">Opciones</span>
+                <span class="profession">¿Que queremos hacer?</span>
             </div>
         </div>
 
@@ -367,7 +367,7 @@ body.dark .ods-info a{
 <li class="nav-link">
     <a href="Admin.php">
         <i class='bx bx-cog icon'></i>
-        <span class="text nav-text">Panel Admin</span>
+        <span class="text nav-text">Administración</span>
     </a>
 </li>
 

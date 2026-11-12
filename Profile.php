@@ -1,93 +1,59 @@
+
 <?php
 session_start();
-require_once 'bd/conexion.php';
 
-// Verificar si inició sesión
-if (!isset($_SESSION['user_id'])) {
+require_once __DIR__ . '/config/firebase.php';
+
+// Verificar sesión
+if (empty($_SESSION['user_id'])) {
     header("Location: Login.php");
     exit();
 }
 
 $id_usuario = $_SESSION['user_id'];
 
-// 1. Obtener datos del usuario
-$stmtUser = $conn->prepare("
-    SELECT Name, Email, Avatar, fondo 
-    FROM users 
-    WHERE id = ?
-");
+try {
+    $database = obtenerFirebaseDatabase();
 
-$stmtUser->bind_param("i", $id_usuario);
-$stmtUser->execute();
+    // Buscar usuario mediante su UID
+    $datosUsuario = $database
+        ->getReference('users/' . $id_usuario)
+        ->getValue();
 
-$resultadoUser = $stmtUser->get_result();
-$usuario = $resultadoUser->fetch_assoc();
-
-$stmtUser->close();
-if ($usuario) {
-
-    $_SESSION['user_name'] = $usuario['Name'];
-    $_SESSION['user_email'] = $usuario['Email'];
-
-    $_SESSION['user_avatar'] = !empty($usuario['Avatar'])
-        ? $usuario['Avatar']
-        : 'uploads/default_avatar.png';
-
-    $_SESSION['user_fondo'] = !empty($usuario['fondo'])
-        ? $usuario['fondo']
-        : 'uploads/default_banner.png';
-
-} else {
-
-    session_destroy();
-    header("Location: Login.php");
-    exit();
-}
-
-// 2. Galería del expositor
-$cuadro1 = "uploads/default_game.png";
-$cuadro2 = "uploads/default_game.png";
-
-$stmtExpo = $pdo->prepare("
-    SELECT numero_cuadro, imagen 
-    FROM exposition 
-    WHERE id_usuario = ?
-");
-
-$stmtExpo->execute([$id_usuario]);
-$imagenes_guardadas = $stmtExpo->fetchAll();
-
-foreach ($imagenes_guardadas as $row) {
-
-    if ($row['numero_cuadro'] == 1) {
-        $cuadro1 = $row['imagen'];
+    if (!is_array($datosUsuario)) {
+        throw new RuntimeException(
+            'No se encontró el perfil del usuario en Firebase.'
+        );
     }
 
-    elseif ($row['numero_cuadro'] == 2) {
-        $cuadro2 = $row['imagen'];
-    }
+    // Actualizar información de la sesión
+    $_SESSION['user_name'] = $datosUsuario['nombre']
+        ?? $_SESSION['user_name']
+        ?? 'Usuario';
+
+    $_SESSION['user_email'] = $datosUsuario['correo']
+        ?? $_SESSION['user_email']
+        ?? '';
+
+    // Imágenes predeterminadas
+    $_SESSION['user_avatar'] = $datosUsuario['avatar']
+        ?? 'uploads/default_avatar.png';
+
+    $_SESSION['user_fondo'] = $datosUsuario['fondo']
+        ?? 'uploads/default_banner.png';
+
+} catch (Throwable $e) {
+    error_log('Error al cargar perfil: ' . $e->getMessage());
+
+    http_response_code(500);
+    exit('No se pudo cargar el perfil. Revisa la conexión con Firebase.');
 }
 
-/* COMENTARIOS */
-
-$stmt = $pdo->prepare("
-SELECT
-comentarios.*,
-users.Name,
-users.Avatar
-
-FROM comentarios
-
-INNER JOIN users
-ON comentarios.autor_id = users.id
-
-WHERE comentarios.usuario_id = ?
-
-ORDER BY comentarios.fecha DESC
-");
-
-$stmt->execute([$id_usuario]);
+// Galería temporal mientras migramos el expositor
+$cuadro1 = 'uploads/default_game.png';
+$cuadro2 = 'uploads/default_game.png';
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -296,85 +262,8 @@ $stmt->execute([$id_usuario]);
 
     </div>
 </div>
-<div class="showcase-section">
 
-    <div class="showcase-title">
-        Comentarios
-    </div>
 
-    <form action="GuardarComentario.php" method="POST">
-
-        <input
-            type="hidden"
-            name="usuario_id"
-            value="<?php echo $id_usuario; ?>">
-
-        <textarea
-            name="comentario"
-            placeholder="Escribe un comentario..."
-            required
-            style="
-                width:100%;
-                height:100px;
-                padding:12px;
-                border-radius:10px;
-                resize:none;
-                margin-bottom:15px;
-            "
-        ></textarea>
-
-        <button
-            class="btn-primary"
-            type="submit">
-            Publicar
-        </button>
-
-    </form>
-
-    <br>
-
-    <?php while($c = $stmt->fetch()): ?>
-
-        <div style="
-            display:flex;
-            gap:15px;
-            background:#2b2d31;
-            padding:15px;
-            border-radius:10px;
-            margin-bottom:15px;
-        ">
-
-            <img
-                src="<?php echo !empty($c['Avatar']) ? $c['Avatar'] : 'uploads/default_avatar.png'; ?>"
-                style="
-                    width:60px;
-                    height:60px;
-                    border-radius:50%;
-                    object-fit:cover;
-                "
-            >
-
-            <div>
-
-                <h3 style="margin:0;color:#00ff66;">
-                    <?php echo htmlspecialchars($c['Name']); ?>
-                </h3>
-
-                <small style="color:#999;">
-                    <?php echo $c['fecha']; ?>
-                </small>
-
-                <p style="color:white;margin-top:10px;">
-                    <?php echo nl2br(htmlspecialchars($c['comentario'])); ?>
-                </p>
-
-            </div>
-
-        </div>
-
-    <?php endwhile; ?>
-
-</div>
 <!-- MODAL DE TEXTOS -->
 <div class="modal-overlay" id="profileModal">
   <div class="modal-content">
@@ -382,13 +271,26 @@ $stmt->execute([$id_usuario]);
     
     <form action="Actualizar_Datos.php" method="POST">
       <div class="form-group">
-        <label for="inputName">Nombre de usuario</label>
-        <input type="text" id="inputName" name="nuevo_nombre" value="<?php echo $_SESSION['user_name']; ?>" required>
-      </div>
-      <div class="form-group">
-        <label for="inputEmail">Correo electrónico</label>
-        <input type="email" id="inputEmail" name="nuevo_email" value="<?php echo $_SESSION['user_email']; ?>" required>
-      </div>
+    <label for="inputName">Nombre de usuario</label>
+    <input
+        type="text"
+        id="inputName"
+        name="nuevo_nombre"
+        value="<?php echo htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8'); ?>"
+        maxlength="50"
+        required
+    >
+</div>
+
+<div class="form-group">
+    <label for="inputEmail">Correo electrónico</label>
+    <input
+        type="email"
+        id="inputEmail"
+        value="<?php echo htmlspecialchars($_SESSION['user_email'], ENT_QUOTES, 'UTF-8'); ?>"
+        readonly
+    >
+</div>
       <div class="modal-actions">
         <button type="button" class="btn-secondary" id="closeModalBtn">Cancelar</button>
         <button type="submit" class="btn-primary" id="saveProfileBtn">Guardar Cambios</button>
