@@ -1,0 +1,151 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --color-principal: #2E7D32;
+    --color-principal-hover: #1B5E20;
+    --texto: #222;
+    --texto-secundario: #555;
+    --fondo: #f4f6f9;
+    --card: rgba(255,255,255,.82);
+    --borde: rgba(0,0,0,.12);
+    --sombra: 0 15px 35px rgba(0,0,0,.18);
+}
+
+body.dark {
+    --texto: #F5F5F5;
+    --texto-secundario: #D4D4D4;
+    --fondo: #111827;
+    --card: rgba(25,30,40,.85);
+    --borde: #374151;
+    --sombra: 0 15px 35px rgba(0,0,0,.55);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 40px;
+    font-family: 'Poppins', sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    transition: background .35s, color .35s;
+}
+
+.dashboard {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 35px;
+}
+
+.encabezado h1 {
+    font-size: 32px;
+    margin: 0;
+}
+
+.encabezado p {
+    color: var(--texto-secundario);
+}
+
+.volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    padding: 14px 22px;
+    border-radius: 15px;
+    font-weight: 600;
+}
+
+.volver:hover {
+    background: #2563eb;
+}
+
+.tarjetas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 25px;
+}
+
+.tarjeta, .seccion {
+    background: var(--card);
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--borde);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: var(--sombra);
+}
+
+.tarjeta h3 {
+    color: var(--texto-secundario);
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0 0 15px;
+}
+
+.tarjeta .numero {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--color-principal);
+}
+
+.seccion {
+    margin-top: 30px;
+}
+
+.seccion h2 {
+    margin-top: 0;
+}
+
+.municipio {
+    margin-top: 20px;
+}
+
+.municipio-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.barra {
+    background: var(--borde);
+    border-radius: 20px;
+    overflow: hidden;
+    height: 14px;
+}
+
+.progreso {
+    height: 100%;
+    background: linear-gradient(90deg, #2E7D32, #4ade80);
+    border-radius: 20px;
+}
+
+@media (max-width: 800px) {
+    .tarjetas {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 20px;
+    }
+
+    .encabezado h1 {
+        font-size: 25px;
+    }
+}

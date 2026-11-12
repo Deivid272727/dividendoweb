@@ -54,8 +54,18 @@ try {
     $_SESSION['user_email'] = $usuario->email ?? '';
     $_SESSION['user_avatar'] = $usuario->photoUrl ?? 'logo2.png';
 
-    // Por seguridad, no conceder permisos de admin automáticamente
-    $_SESSION['user_rol'] = 'user';
+
+    // Consultar el rol real del usuario en Firebase Realtime Database
+$database = obtenerFirebaseDatabase();
+    $rolFirebase = $database
+        ->getReference('users/' . $uid . '/rol')
+        ->getValue();
+
+    // Solo conceder admin si Firebase lo confirma
+    $_SESSION['user_rol'] = ($rolFirebase === 'admin')
+        ? 'admin'
+        : 'user';
+
 
     echo json_encode([
         'success' => true,

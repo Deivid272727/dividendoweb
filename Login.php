@@ -1,82 +1,12 @@
+
 <?php
 session_start();
-require_once 'bd/conexion.php'; // Tu archivo de conexión PDO
 
-$error_msg = "";
-$success_msg = "";
-
-// ==========================================
-// LOGICA DE REGISTRO (Sign Up)
-// ==========================================
-if (isset($_POST['register_btn'])) {
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
-    
-    // Asignamos el archivo por defecto que guardaste en tu carpeta
-    $foto_defecto = "logo2.png"; 
-
-    if (!empty($name) && !empty($email) && !empty($password)) {
-        // Encriptamos la contraseña por seguridad
-        $passwordHash = password_hash($password, PASSWORD_BCRYPT);
-
-        try {
-            // Verificar si el correo ya existe
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE Email = ?");
-            $stmt->execute([$email]);
-            
-            if ($stmt->rowCount() > 0) {
-                $error_msg = "El correo ya está registrado, lince.";
-            } else {
-                // MODIFICADO: Ahora inserta en la columna 'Avatar'
-                $stmt = $pdo->prepare("INSERT INTO users (Name, Email, Password, Avatar) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$name, $email, $passwordHash, $foto_defecto]);
-                $success_msg = "¡Registro exitoso! Ya puedes iniciar sesión.";
-            }
-        } catch (PDOException $e) {
-            $error_msg = "Error en el registro: " . $e->getMessage();
-        }
-    }
-}
-
-// ==========================================
-// LOGICA DE INICIO DE SESIÓN (Sign In)
-// ==========================================
-if (isset($_POST['login_btn'])) {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
-
-    if (!empty($email) && !empty($password)) {
-        try {
-            // Buscamos al usuario por Email
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE Email = ?");
-            $stmt->execute([$email]);
-            $user = $stmt->fetch();
-
-            // Si existe el usuario y la contraseña coincide
-            if ($user && password_verify($password, $user['Password'])) {
-                // Guardamos los datos en la sesión para que los use tu menú flotante
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user_name'] = $user['Name'];
-                $_SESSION['user_email'] = $user['Email'];
-                
-                // MODIFICADO: Jalamos el valor de la columna 'Avatar' de la base de datos
-                $_SESSION['user_avatar'] = $user['Avatar']; 
-                $_SESSION['user_rol'] = $user['rol'];
-
-                // Redirigimos a la página de inicio
-                header("Location: Index.php");
-                exit;
-            } else {
-                $error_msg = "Credenciales incorrectas de prro :v";
-            }
-        } catch (PDOException $e) {
-            $error_msg = "Error en el login: " . $e->getMessage();
-        }
-    }
+if (!empty($_SESSION['user_id'])) {
+    header('Location: index.php');
+    exit();
 }
 ?>
-
 
 
 <!DOCTYPE html>
@@ -199,14 +129,6 @@ if (isset($_POST['login_btn'])) {
 <!-- Header de la pagina -->
 <section class = "home">
    
-<?php if(!empty($error_msg)): ?>
-    <div style="color: red; text-align: center; margin-bottom: 10px; font-weight: bold;"><?php echo $error_msg; ?></div>
-<?php endif; ?>
-
-<?php if(!empty($success_msg)): ?>
-    <div style="color: green; text-align: center; margin-bottom: 10px; font-weight: bold;"><?php echo $success_msg; ?></div>
-<?php endif; ?>
-
 <!-- Registrarse -->
     <div class = "container" id="container">
      <div class="form-container sign-up">

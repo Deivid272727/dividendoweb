@@ -39,9 +39,6 @@ try {
     exit("No se pudieron verificar los permisos.");
 }
 
-// Temporalmente mantenemos MySQL para el resto del panel
-require_once 'bd/conexion.php';
-
 // Obtener parques desde Firebase
 $parques = $database
     ->getReference('parques')
@@ -272,6 +269,11 @@ $municipiosPermitidos = [
         Regresar
 
     </a>
+    <a href="Estadisticas.php" class="btn-regresar">
+        <i class="fa-solid fa-chart-column"></i>
+        Estadísticas
+    </a>
+
 
     <button id="toggle-dark" class="modo-btn">
 
