@@ -439,11 +439,12 @@ if ($meta > 0) {
                 <div class="barra-progreso" style="width: <?php echo round($porcentaje); ?>%;"></div>
             </div>
 
-           
-<a href="PagoTarj.php?id=<?= urlencode((string)$id_parque) ?>"
-   class="btn-donar">
-    💳 Donar ahora
+<a href="PagoTarj.php?id=<?= urlencode($id) ?>"
+   class="donacion-btn">
+    <i class='bx bx-donate-heart'></i>
+    Donar ahora
 </a>
+
 
 
             <?php if(!empty($parque['ubicacion'])): ?>
