@@ -1,6 +1,8 @@
 {
     "require": {
         "kreait/firebase-php": "7.24.1",
-        "firebase/php-jwt": "7.0.2"
+        "firebase/php-jwt": "7.0.2",
+        "mercadopago/dx-php": "^3.16",
+        "vlucas/phpdotenv": "^5.8"
     }
 }

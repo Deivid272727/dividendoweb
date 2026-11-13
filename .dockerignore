@@ -2,3 +2,14 @@ vendor/
 .git/
 .env
 .env.*
+
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+*serviceAccount*.json
+*firebase-adminsdk*.json
+vendor/
+node_modules/
+*.log

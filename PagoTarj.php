@@ -1,8 +1,18 @@
+﻿
 <?php
 
-$id_parque = $_GET['id'] ?? 0;
+require_once __DIR__ . '/config/mercadopago/public_key.php';
+
+$id_parque = filter_input(
+    INPUT_GET,
+    'id',
+    FILTER_VALIDATE_INT
+) ?: 0;
+
+$mpPublicKey = obtenerMercadoPagoPublicKey();
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -11,6 +21,9 @@ $id_parque = $_GET['id'] ?? 0;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finalizar Pago - Dividendo</title>
     <link rel="stylesheet" href="Css/pago.css">
+
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+
 </head>
 <body>
     <div class="payment-container">
@@ -24,11 +37,10 @@ $id_parque = $_GET['id'] ?? 0;
                     <h1 id="display-monto">$0</h1>
                 </div>
             </div>
-            
+
             <div class="right-side">
-                <form action="donacion.php" method="POST" id="payment-form">
-                    <h3>Detalles de Pago</h3>
-                     
+<form id="payment-form" onsubmit="event.preventDefault(); alert('Estamos preparando el pago seguro con Mercado Pago.');">                    <h3>Detalles de Pago</h3>
+
 
                                    <input
                        type="hidden"
@@ -39,27 +51,15 @@ $id_parque = $_GET['id'] ?? 0;
                         <label>Monto a donar ($)</label>
                         <input type="number" name="monto" id="input-monto" placeholder="Ej: 500" required oninput="document.getElementById('display-monto').innerText = '$' + this.value">
                     </div>
+<div id="mercadopago-card-container">
+    <h3>Pago seguro con Mercado Pago</h3>
+    <p>
+        Estamos preparando el formulario
+        de donaciones de prueba.
+    </p>
 
-                    <div class="input-group">
-                        <label>Nombre en la tarjeta</label>
-                        <input type="text" name="name" placeholder="Juan Pérez" required minlength="3" maxlength="40" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ ]+" oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ ]/g,'')">
-                    </div>
-
-                    <div class="input-group">
-                        <label>Número de tarjeta</label>
-                        <input type="text" name="tarjeta" placeholder="0000000000000000" required minlength="16" maxlength="16" pattern="[0-9]{16}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                    </div>
-
-                    <div class="row">
-                        <div class="input-group">
-                            <label>Expira (Fecha)</label>
-                            <input type="date" name="date" required>
-                        </div>
-                        <div class="input-group">
-                            <label>CVV</label>
-                            <input type="password" name="cvv" placeholder="123" requiredminlength="3" maxlength="3" pattern="[0-9]{3}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">   
-                        </div>
-                    </div>
+    <div id="paymentBrick_container"></div>
+</div>
 
                     <button type="submit" class="pay-btn">Confirmar Pago</button>
                     <a href="Municipios.php" class="back-link">Cancelar y volver</a>
@@ -67,5 +67,28 @@ $id_parque = $_GET['id'] ?? 0;
             </div>
         </div>
     </div>
+<script>
+    const mpPublicKey = <?php echo json_encode($mpPublicKey); ?>;
+
+    if (mpPublicKey) {
+        const mp = new MercadoPago(mpPublicKey, {
+            locale: 'es-MX'
+        });
+
+        console.log('Mercado Pago inicializado correctamente');
+
+        // Buscar el contenedor del formulario
+        const contenedorPago = document.getElementById('paymentBrick_container');
+
+        if (contenedorPago) {
+            console.log('Contenedor de Mercado Pago encontrado');
+        } else {
+            console.error('No se encontrÃ³ el contenedor de pago');
+        }
+
+    } else {
+        console.error('No se encontrÃ³ la Public Key');
+    }
+</script>
 </body>
 </html>

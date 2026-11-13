@@ -1,0 +1,15 @@
+
+# Credenciales privadas
+.env
+.env.*
+!.env.example
+
+# Claves de Firebase
+*serviceAccount*.json
+*firebase-adminsdk*.json
+
+# Dependencias instaladas con Composer
+/vendor/
+
+# Archivos temporales
+*.log

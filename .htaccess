@@ -1,0 +1,5 @@
+
+# Bloquear archivos privados
+<FilesMatch "^(\.env(\..*)?|\.gitignore|\.dockerignore)$">
+    Require all denied
+</FilesMatch>
