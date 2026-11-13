@@ -203,7 +203,7 @@ $municipiosPermitidos = [
 
     <title>Panel de Administración</title>
 
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="Css/admin.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
