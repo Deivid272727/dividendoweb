@@ -439,9 +439,12 @@ if ($meta > 0) {
                 <div class="barra-progreso" style="width: <?php echo round($porcentaje); ?>%;"></div>
             </div>
 
-           <div class="paypal-container">
-    <p>Las donaciones estarán disponibles próximamente.</p>
-</div>
+           
+<a href="PagoTarj.php?id=<?= urlencode((string)$id_parque) ?>"
+   class="btn-donar">
+    💳 Donar ahora
+</a>
+
 
             <?php if(!empty($parque['ubicacion'])): ?>
                 <h3>Ubicación</h3>

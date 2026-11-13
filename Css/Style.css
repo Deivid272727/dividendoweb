@@ -321,3 +321,19 @@ body.dark .switch::before{
     font-weight:600;
     box-shadow:0 5px 15px rgba(0,0,0,.15);
 }
+
+.btn-donar {
+    display: inline-block;
+    padding: 14px 30px;
+    background: #009ee3;
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-donar:hover {
+    background: #007eb5;
+    transform: translateY(-2px);
+}
