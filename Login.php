@@ -58,7 +58,7 @@ if (!empty($_SESSION['user_id'])) {
                 </li>
             <ul class="menu-links">
                 <li class="nav-link">
-                    <a href="Index.php">
+                    <a href="index.php">
                         <i class="bx bx-home-alt icon"></i>
                         <span class="text nav-text">Casitá</span>
                     </a>
@@ -234,7 +234,7 @@ function handleCredentialResponse(response)
         if(data.trim() === "success")
         {
             window.location =
-            "Index.php";
+            "index.php";
         }
         else
         {
