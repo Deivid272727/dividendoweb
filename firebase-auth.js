@@ -55,6 +55,9 @@ const respuesta = await fetch("firebase-session.php", {
 // Leer la respuesta del servidor
 const datos = await respuesta.json();
 
+console.log("Estado HTTP:", respuesta.status);
+console.log("Respuesta de PHP:", datos);
+
 if (!respuesta.ok || !datos.success) {
     throw new Error(datos.message || "No se pudo crear la sesión PHP.");
 }
@@ -67,7 +70,9 @@ window.location.href = "index.php";
 
 
         } catch (error) {
-            console.error("Error de Firebase:", error.code);
+
+console.error("Error completo del inicio de sesión:", error);
+console.error("Mensaje:", error.message);
 
             if (
                 error.code === "auth/invalid-credential" ||
