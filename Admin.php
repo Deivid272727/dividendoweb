@@ -4,6 +4,9 @@ if (empty($_SESSION['csrf_admin'])) {
     $_SESSION['csrf_admin'] = bin2hex(random_bytes(32));
 }
 require_once __DIR__ . '/config/firebase.php';
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Cloudinary\Cloudinary;
 
 // Verificar que exista una sesión
 if (empty($_SESSION['user_id'])) {
@@ -63,7 +66,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     $municipio = trim($_POST['municipio'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
     $ubicacion = trim($_POST['ubicacion'] ?? '');
-    $imagenUrl = trim($_POST['imagenUrl'] ?? '');
+
+
+$imagenUrl = '';
+
+if (
+    !isset($_FILES['imagenParque']) ||
+    $_FILES['imagenParque']['error'] !== UPLOAD_ERR_OK
+) {
+    http_response_code(400);
+    exit('Debes seleccionar una fotografía válida.');
+}
+
+$archivo = $_FILES['imagenParque'];
+
+if ($archivo['size'] > 5 * 1024 * 1024) {
+    http_response_code(400);
+    exit('La fotografía no debe superar los 5 MB.');
+}
+
+$tipo = (new finfo(FILEINFO_MIME_TYPE))
+    ->file($archivo['tmp_name']);
+
+if (!in_array($tipo, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+    http_response_code(400);
+    exit('Solo se permiten imágenes JPG, PNG o WebP.');
+}
+
+try {
+    $cloudinary = new Cloudinary([
+        'cloud' => [
+            'cloud_name' => getenv('CLOUDINARY_CLOUD_NAME'),
+            'api_key' => getenv('CLOUDINARY_API_KEY'),
+            'api_secret' => getenv('CLOUDINARY_API_SECRET')
+        ],
+        'url' => ['secure' => true]
+    ]);
+
+    $resultado = $cloudinary->uploadApi()->upload(
+        $archivo['tmp_name'],
+        [
+            'folder' => 'dividendo/parques',
+            'resource_type' => 'image'
+        ]
+    );
+
+    $imagenUrl = $resultado['secure_url'];
+
+} catch (Throwable $e) {
+    error_log('Error subiendo imagen: ' . $e->getMessage());
+    http_response_code(500);
+    exit('No se pudo subir la fotografía.');
+}
+
     $mapsUrl = trim($_POST['mapsUrl'] ?? '');
 
     $meta = filter_var(
