@@ -1,6 +1,8 @@
 <?php
 session_start();
-
+if (empty($_SESSION['csrf_comentarios'])) {
+    $_SESSION['csrf_comentarios'] = bin2hex(random_bytes(32));
+}
 require_once __DIR__ . '/config/firebase.php';
 
 $id = trim((string) ($_GET['id'] ?? ''));
@@ -93,6 +95,80 @@ if ($meta > 0) {
         100,
         max(0, ($recaudadoSimulado / $meta) * 100)
     );
+}
+
+$comentariosParque = [];
+$esAdmin = false;
+$nombresUsuarios = [];
+
+try {
+    // Verificar el rol directamente en Firebase
+    if (!empty($_SESSION['user_id'])) {
+        $rol = $database
+            ->getReference('users/' . $_SESSION['user_id'] . '/rol')
+            ->getValue();
+
+        $esAdmin = ($rol === 'admin');
+    }
+
+    // Consultar comentarios
+    $todosComentarios = $database
+        ->getReference('comentarios')
+        ->getValue() ?? [];
+
+    if (is_array($todosComentarios)) {
+        foreach ($todosComentarios as $comentarioId => $comentario) {
+            if (!is_array($comentario)) {
+                continue;
+            }
+
+            // Mostrar solo los comentarios de este parque
+            if ((string)($comentario['parqueId'] ?? '') !== $id) {
+                continue;
+            }
+
+            $usuarioId = (string)($comentario['usuarioId'] ?? '');
+
+            // Obtener el nombre del autor
+            if (!isset($nombresUsuarios[$usuarioId])) {
+                $nombreUsuario = 'Usuario';
+
+                if (
+                    $usuarioId !== '' &&
+                    !preg_match('/[.#$\[\]\/\x00-\x1F\x7F]/', $usuarioId)
+                ) {
+                    $usuario = $database
+                        ->getReference('users/' . $usuarioId)
+                        ->getValue();
+
+                    if (is_array($usuario)) {
+                        $nombreUsuario = (string)(
+                            $usuario['nombre'] ?? 'Usuario'
+                        );
+                    }
+                }
+
+                $nombresUsuarios[$usuarioId] = $nombreUsuario;
+            }
+
+            $comentariosParque[] = [
+                'id' => (string)$comentarioId,
+                'nombre' => $nombresUsuarios[$usuarioId],
+                'texto' => (string)($comentario['comentario'] ?? ''),
+                'fecha' => (string)($comentario['fecha'] ?? '')
+            ];
+        }
+    }
+
+    usort(
+        $comentariosParque,
+        fn($a, $b) => strcmp($b['fecha'], $a['fecha'])
+    );
+
+} catch (Throwable $e) {
+    error_log('Error cargando comentarios: ' . $e->getMessage());
+    $comentariosParque = [];
+    $errorComentarios = 'No se pudieron cargar los comentarios.';
 }
 
 ?>
@@ -327,6 +403,43 @@ if ($meta > 0) {
     font-size:22px;
 
 }
+.comentarios-parque {
+    margin-top: 40px;
+    max-width: 750px;
+}
+
+.comentario-tarjeta {
+    background: var(--sidebar-color);
+    padding: 20px;
+    border-radius: 12px;
+    margin: 15px 0;
+    border: 1px solid rgba(128,128,128,0.2);
+    overflow-wrap: anywhere;
+}
+
+.comentario-tarjeta h3 {
+    margin: 0 0 8px;
+}
+
+.comentario-tarjeta small {
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.comentario-tarjeta p {
+    white-space: normal;
+    line-height: 1.6;
+}
+
+.eliminar-comentario {
+    background: #c62828;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    margin-top: 10px;
+}
         </style>
     </head>
 
@@ -359,7 +472,7 @@ if ($meta > 0) {
                 <ul class="menu-links">
 
                     <li class="nav-link">
-                        <a href="Index.php">
+                        <a href="index.php">
                             <i class="bx bx-home-alt icon"></i>
                             <span class="text nav-text">Casitá</span>
                         </a>
@@ -478,7 +591,7 @@ if ($meta > 0) {
 </p>
 
 <p>
-    <strong>Donaciones simuladas:</strong>
+    <strong>Donaciones:</strong>
     $<?= number_format($recaudadoSimulado, 2) ?> MXN
 </p>
 
@@ -487,10 +600,6 @@ if ($meta > 0) {
     <?= round($porcentaje, 1) ?>%
 </p>
 
-<p>
-    <strong>Donaciones de prueba registradas:</strong>
-    <?= $cantidadDonaciones ?>
-</p>
 
 
             <div class="barra-contenedor">
@@ -522,6 +631,89 @@ if ($meta > 0) {
                     </a>
                 </p>
             <?php endif; ?>
+            
+<section class="comentarios-parque">
+    <h2>Comentarios del parque</h2>
+
+    <?php if (!empty($_GET['comentario']) &&
+              $_GET['comentario'] === 'ok'): ?>
+        <p>¡Tu comentario se publicó correctamente!</p>
+    <?php endif; ?>
+
+    <?php if (!empty($errorComentarios)): ?>
+        <p><?= htmlspecialchars($errorComentarios, ENT_QUOTES, 'UTF-8') ?></p>
+    <?php elseif (empty($comentariosParque)): ?>
+        <p>Todavía no hay comentarios. ¡Sé el primero!</p>
+    <?php else: ?>
+
+        <?php foreach ($comentariosParque as $comentario): ?>
+            <article class="comentario-tarjeta">
+
+                <h3>
+                    <?= htmlspecialchars(
+                        $comentario['nombre'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>
+                </h3>
+
+                <small>
+                    <?php
+                    try {
+                        $fecha = new DateTimeImmutable(
+                            $comentario['fecha']
+                        );
+
+                        echo htmlspecialchars(
+                            $fecha->setTimezone(
+                                new DateTimeZone('America/Monterrey')
+                            )->format('d/m/Y H:i'),
+                            ENT_QUOTES,
+                            'UTF-8'
+                        );
+                    } catch (Throwable $e) {
+                        echo 'Sin fecha';
+                    }
+                    ?>
+                </small>
+
+                <p>
+                    <?= nl2br(htmlspecialchars(
+                        $comentario['texto'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    )) ?>
+                </p>
+
+                <?php if ($esAdmin): ?>
+                    <form action="EliminarComentario.php" method="POST"
+                          onsubmit="return confirm('¿Eliminar este comentario?');">
+
+                        <input type="hidden" name="comentario_id"
+                               value="<?= htmlspecialchars($comentario['id'], ENT_QUOTES, 'UTF-8') ?>">
+
+                        <input type="hidden" name="parque_id"
+                               value="<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>">
+
+                        <input type="hidden" name="csrf_token"
+                               value="<?= htmlspecialchars($_SESSION['csrf_comentarios'], ENT_QUOTES, 'UTF-8') ?>">
+
+                        <button type="submit" class="eliminar-comentario">
+                            Eliminar comentario
+                        </button>
+                    </form>
+                    <form action="GuardarComentario.php" method="POST">
+                <?php endif; ?>
+
+            </article>
+        <?php endforeach; ?>
+
+    <?php endif; ?>
+
+    <!-- Mantén aquí el formulario para publicar
+         comentarios que agregamos anteriormente. -->
+</section>
+
         </div>
 
     </section>
