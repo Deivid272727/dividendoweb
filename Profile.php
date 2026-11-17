@@ -236,6 +236,13 @@ $cuadro2 = 'uploads/default_game.png';
         </label>
       </form>
       <button class="btn-primary" id="openModalBtn" style="margin: 0; white-space: nowrap;">Modificar Perfil</button>
+      <a
+    href="MisDonaciones.php"
+    class="btn-secondary"
+    style="display:inline-block; margin:0; white-space:nowrap; text-decoration:none;"
+>
+    Mis donaciones
+</a>
     </div>
   </div>
 
