@@ -468,6 +468,19 @@ try {
 .formulario-comentario button:hover {
     background: #218838;
 }
+.alerta-comentario {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    border-left: 5px solid #ffc107;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.alerta-comentario p {
+    margin: 8px 0 0;
+}
         </style>
     </head>
 
@@ -660,13 +673,47 @@ try {
                 </p>
             <?php endif; ?>
             
-<section class="comentarios-parque">
+
+<section class="comentarios-parque" id="comentarios">
+
+    <?php if (!empty($_SESSION['aviso_comentario'])): ?>
+
+        <div class="alerta-comentario">
+            <strong> Comentario rechazado, no seas grosero>:[</strong>
+            <p>
+                <?= htmlspecialchars(
+                    $_SESSION['aviso_comentario'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>
+            </p>
+        </div>
+
+        <?php unset($_SESSION['aviso_comentario']); ?>
+
+    <?php endif; ?>
     <h2>Comentarios del parque</h2>
 
     <?php if (!empty($_GET['comentario']) &&
               $_GET['comentario'] === 'ok'): ?>
-        <p>¡Tu comentario se publicó correctamente!</p>
-    <?php endif; ?>
+<p id="mensaje-exito" style="color: #28a745;">
+    ¡Tu comentario se publicó correctamente!
+</p>
+
+<script>
+    setTimeout(function() {
+        const mensaje = document.getElementById('mensaje-exito');
+
+        if (mensaje) {
+            mensaje.style.display = 'none';
+        }
+
+        // Quitar el parámetro de la URL
+        const url = new URL(window.location.href);
+        url.searchParams.delete('comentario');
+        window.history.replaceState({}, '', url);
+    }, 3000);
+</script>    <?php endif; ?>
 
     <?php if (!empty($errorComentarios)): ?>
         <p><?= htmlspecialchars($errorComentarios, ENT_QUOTES, 'UTF-8') ?></p>

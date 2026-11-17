@@ -53,8 +53,24 @@ if (
     exit('El comentario debe tener entre 1 y 500 caracteres.');
 }
 
-// Aplicar censura antes de guardar
-$comentario = censurarComentario($comentario);
+
+ // Revisar si el comentario contiene palabras prohibidas
+$comentarioCensurado = censurarComentario($comentario);
+
+if ($comentarioCensurado !== $comentario) {
+
+    $_SESSION['aviso_comentario'] =
+        'Tu comentario contiene lenguaje inapropiado. ' .
+        'Por favor, modifícalo antes de publicarlo.';
+
+    header(
+        'Location: DetalleParque.php?id=' .
+        urlencode($idParque) .
+        '#comentarios'
+    );
+    exit();
+}
+
 
 try {
     $database = obtenerFirebaseDatabase();
