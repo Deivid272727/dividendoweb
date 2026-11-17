@@ -167,7 +167,7 @@ session_start();
             <ul class="menu-links">
 
                 <li class="nav-link">
-                    <a href="Index.php">
+                    <a href="index.php">
                         <i class="bx bx-home-alt icon"></i>
                         <span class="text nav-text">Casitá</span>
                     </a>
@@ -193,6 +193,12 @@ session_start();
 
                 </li>
 
+                <li class="nav-link">
+    <a href="Admin.php">
+        <i class='bx bx-cog icon'></i>
+        <span class="text nav-text">Administración</span>
+    </a>
+</li>
                 <li class="nav-link">
                     <a href="municipios.php">
                         <i class='bx bxs-tree-alt icon'></i>
