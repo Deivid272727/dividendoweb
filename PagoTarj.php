@@ -2,12 +2,16 @@
 
 require_once __DIR__ . '/config/mercadopago/public_key.php';
 
-$id_parque = filter_input(
-    INPUT_GET,
-    'id',
-    FILTER_VALIDATE_INT
-) ?: 0;
+$id_parque = $_GET['id'] ?? '';
 
+if (
+    !is_string($id_parque) ||
+    $id_parque === '' ||
+    preg_match('/[.#$\[\]\/\x00-\x1F\x7F]/', $id_parque)
+) {
+    http_response_code(400);
+    exit('ID de parque inválido.');
+}
 $mpPublicKey = obtenerMercadoPagoPublicKey();
 
 ?>
@@ -38,8 +42,11 @@ $mpPublicKey = obtenerMercadoPagoPublicKey();
             </div>
 
             <div class="right-side">
-<form id="payment-form" onsubmit="event.preventDefault(); alert('Estamos preparando el pago seguro con Mercado Pago.');">                    <h3>Detalles de Pago</h3>
-
+<form
+    id="payment-form"
+    method="POST"
+    action="ProcesarDonacion.php"
+>
 
                                    <input
                        type="hidden"
@@ -48,8 +55,17 @@ $mpPublicKey = obtenerMercadoPagoPublicKey();
 
                     <div class="input-group">
                         <label>Monto a donar ($)</label>
-                        <input type="number" name="monto" id="input-monto" placeholder="Ej: 500" required oninput="document.getElementById('display-monto').innerText = '$' + this.value">
-                    </div>
+<input
+    type="number"
+    name="monto"
+    id="input-monto"
+    min="1"
+    max="10000"
+    step="0.01"
+    placeholder="Ej: 500"
+    required
+    oninput="document.getElementById('display-monto').innerText = '$' + this.value"
+>                    </div>
 <div id="mercadopago-card-container">
     <h3>Pago seguro con Mercado Pago</h3>
     <p>
@@ -60,8 +76,12 @@ $mpPublicKey = obtenerMercadoPagoPublicKey();
     <div id="paymentBrick_container"></div>
 </div>
 
-                    <button type="submit" class="pay-btn">Confirmar Pago</button>
-                    <a href="Municipios.php" class="back-link">Cancelar y volver</a>
+<button type="submit" class="pay-btn">
+    Registrar donación de prueba
+</button>                     <a
+                      href="DetalleParque.php?id=<?= urlencode($id_parque) ?>"
+                      class="back-link"> Cancelar y volver
+                     </a>
                 </form>
             </div>
         </div>
