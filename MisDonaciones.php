@@ -186,8 +186,8 @@ if (is_array($todasDonaciones)) {
 
 <div class="contenedor">
 
-    <h1>Mis donaciones 🌳</h1>
-    <p>Consulta tus aportaciones registradas en Dividendo.</p>
+    <h1>Mis donaciones</h1>
+    <p>Consulta tus aportaciones a los parques</p>
 
     <?php if ($error !== ''): ?>
         <p><?= escapar($error) ?></p>
