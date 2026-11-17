@@ -232,8 +232,8 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
         <div>
             <h1>Estadísticas de Dividendo</h1>
             <p>
-                Información de parques, usuarios y
-                donaciones simuladas en Firebase.
+                Usuarios y
+                donaciones en Firebase.
             </p>
         </div>
 

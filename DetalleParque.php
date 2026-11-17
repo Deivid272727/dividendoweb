@@ -38,18 +38,63 @@ $nombre = $parque['nombre'] ?? 'Parque sin nombre';
 $descripcion = $parque['descripcion'] ?? '';
 $ubicacion = $parque['ubicacion'] ?? '';
 
-$meta = (float) ($parque['metaDonaciones'] ?? 0);
-$recaudado = (float) ($parque['montoRecaudado'] ?? 0);
 
-// Calcular porcentaje de donaciones
+$meta = max(0, (float)($parque['metaDonaciones'] ?? 0));
+
+// Consultar las donaciones simuladas
+$totalSimuladoCentavos = 0;
+$cantidadDonaciones = 0;
+
+try {
+    $donaciones = $database
+        ->getReference('donaciones')
+        ->getValue() ?? [];
+
+    if (is_array($donaciones)) {
+        foreach ($donaciones as $donacion) {
+            if (!is_array($donacion)) {
+                continue;
+            }
+
+            // Solo donaciones de este parque
+            if ((string)($donacion['parqueId'] ?? '') !== $id) {
+                continue;
+            }
+
+            // Excluir pagos reales y otros estados
+            if (($donacion['estado'] ?? '') !== 'simulada') {
+                continue;
+            }
+
+            $centavos = (int)($donacion['montoCentavos'] ?? 0);
+
+            if ($centavos <= 0) {
+                continue;
+            }
+
+            $totalSimuladoCentavos += $centavos;
+            $cantidadDonaciones++;
+        }
+    }
+} catch (Throwable $e) {
+    error_log('Error consultando donaciones: ' . $e->getMessage());
+    http_response_code(500);
+    exit('No se pudo calcular el progreso de prueba.');
+}
+
+// Convertir centavos a pesos
+$recaudadoSimulado = $totalSimuladoCentavos / 100;
+
+// Calcular porcentaje de la meta
 $porcentaje = 0;
 
 if ($meta > 0) {
     $porcentaje = min(
         100,
-        max(0, ($recaudado / $meta) * 100)
+        max(0, ($recaudadoSimulado / $meta) * 100)
     );
 }
+
 ?>
 
     <!DOCTYPE html>
@@ -426,8 +471,27 @@ if ($meta > 0) {
                 <?php echo htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8'); ?>
             </p>
 
-            <<p><strong>Meta:</strong> $<?php echo number_format($meta, 2); ?></p>
-            <p><strong>Progreso:</strong> <?php echo round($porcentaje); ?>%</p>
+            
+<p>
+    <strong>Meta del parque:</strong>
+    $<?= number_format($meta, 2) ?> MXN
+</p>
+
+<p>
+    <strong>Donaciones simuladas:</strong>
+    $<?= number_format($recaudadoSimulado, 2) ?> MXN
+</p>
+
+<p>
+    <strong>Progreso de prueba:</strong>
+    <?= round($porcentaje, 1) ?>%
+</p>
+
+<p>
+    <strong>Donaciones de prueba registradas:</strong>
+    <?= $cantidadDonaciones ?>
+</p>
+
 
             <div class="barra-contenedor">
                 <div class="barra-progreso" style="width: <?php echo round($porcentaje); ?>%;"></div>
