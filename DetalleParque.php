@@ -349,12 +349,6 @@ if ($meta > 0) {
                         </a>
                     </li>
 
-                    <li class="nav-link">
-                        <a href="#">
-                            <i class="bx bx-heart icon"></i>
-                            <span class="text nav-text">Santa chad</span>
-                        </a>
-                    </li>
 
                 </ul>
             </div>

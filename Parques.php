@@ -326,8 +326,8 @@ try {
             </span>
 
             <div class="text header-text">
-                <span class="name">Y esta mafudada?</span>
-                <span class="profession">No se bro</span>
+                <span class="name">Opciones</span>
+                <span class="profession">¿Que queremos hacer?</span>
             </div>
         </div>
 
