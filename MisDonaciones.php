@@ -20,13 +20,26 @@ $error = '';
 try {
     $database = obtenerFirebaseDatabase();
 
-    // Consultar donaciones del usuario autenticado
-    $datos = $database
-        ->getReference('donaciones')
-        ->orderByChild('usuarioId')
-        ->equalTo($idUsuario)
-        ->getValue() ?? [];
+// Obtener todas las donaciones
+$todasDonaciones = $database
+    ->getReference('donaciones')
+    ->getValue() ?? [];
 
+$datos = [];
+
+if (is_array($todasDonaciones)) {
+    foreach ($todasDonaciones as $id => $donacion) {
+
+        if (!is_array($donacion)) {
+            continue;
+        }
+
+        // Mostrar únicamente las donaciones del usuario actual
+        if ((string)($donacion['usuarioId'] ?? '') === $idUsuario) {
+            $datos[$id] = $donacion;
+        }
+    }
+}
     if (!is_array($datos)) {
         $datos = [];
     }
