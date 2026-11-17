@@ -194,7 +194,7 @@ if (is_array($todasDonaciones)) {
     <?php else: ?>
 
         <div class="resumen">
-            <h2>Total de donaciones simuladas</h2>
+            <h2>Total de donaciones</h2>
 
             <div class="total">
                 $<?= number_format($totalCentavos / 100, 2) ?> MXN
