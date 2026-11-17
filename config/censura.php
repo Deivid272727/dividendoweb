@@ -15,7 +15,10 @@ function censurarComentario(string $texto): string
         'verga',
         'idiota',
         'xxx',
-        'puñetas'
+        'puñetas',
+        'sexo',
+        'estupido'.
+        'estupida'
     ];
 
     foreach ($palabrasProhibidas as $palabra) {
