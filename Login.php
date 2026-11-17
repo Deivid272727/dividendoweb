@@ -74,7 +74,7 @@ if (!empty($_SESSION['user_id'])) {
                                    </li>
             <ul class="menu-links">
                 <li class="nav-link">
-                    <a href="municipios.php">
+                    <a href="Parques.php">
             <i class='bx bxs-tree-alt icon'></i>
                 
             

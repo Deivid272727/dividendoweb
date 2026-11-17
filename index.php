@@ -385,7 +385,7 @@ body.dark .ods-info a{
                 </li>
 
                 <li class="nav-link">
-                    <a href="municipios.php">
+                    <a href="Parques.php">
                         <i class='bx bxs-tree-alt icon'></i>
                         <span class="text nav-text">Parques</span>
                     </a>
@@ -553,7 +553,7 @@ body.dark .ods-info a{
 
     <div class="btn-ver">
 
-        <a href="Municipios.php">
+        <a href="Parques.php">
 
             Ver Todos
 

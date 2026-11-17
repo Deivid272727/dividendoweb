@@ -167,7 +167,7 @@ $cuadro2 = 'uploads/default_game.png';
     </a>
 </li>
                 <li class="nav-link">
-                    <a href="Municipios.php">
+                    <a href="Parques.php">
                         <i class='bx bxs-tree-alt icon'></i>
                         <span class="text nav-text">Parques</span>
                     </a>

@@ -343,7 +343,7 @@ if ($meta > 0) {
                     </li>
 
                     <li class="nav-link">
-                        <a href="municipios.php">
+                        <a href="Parques.php">
                             <i class='bx bxs-tree-alt icon'></i>
                             <span class="text nav-text">Parques</span>
                         </a>
