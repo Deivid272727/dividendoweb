@@ -440,6 +440,34 @@ try {
     cursor: pointer;
     margin-top: 10px;
 }
+.formulario-comentario {
+    margin-top: 30px;
+}
+
+.formulario-comentario textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.formulario-comentario button {
+    margin-top: 12px;
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.formulario-comentario button:hover {
+    background: #218838;
+}
         </style>
     </head>
 
@@ -710,8 +738,54 @@ try {
 
     <?php endif; ?>
 
-    <!-- Mantén aquí el formulario para publicar
-         comentarios que agregamos anteriormente. -->
+
+<?php if (!empty($_SESSION['user_id'])): ?>
+
+    <div class="formulario-comentario">
+        <h3>Deja tu comentario</h3>
+
+        <form action="GuardarComentario.php" method="POST">
+
+            <input
+                type="hidden"
+                name="parque_id"
+                value="<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>"
+            >
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars(
+                    $_SESSION['csrf_comentarios'],
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>"
+            >
+
+            <textarea
+                name="comentario"
+                placeholder="Escribe tu opinión sobre este parque..."
+                maxlength="500"
+                rows="4"
+                required
+            ></textarea>
+
+            <button type="submit">
+                Publicar comentario
+            </button>
+
+        </form>
+    </div>
+
+<?php else: ?>
+
+    <p>
+        Para escribir un comentario debes
+        <a href="Login.php">iniciar sesión</a>.
+    </p>
+
+<?php endif; ?>
+
 </section>
 
         </div>
