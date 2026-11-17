@@ -3,7 +3,11 @@ session_start();
 
 require_once __DIR__ . '/config/firebase.php';
 
-$municipio = trim($_GET['municipio'] ?? '');
+$municipio = isset($_GET['municipio']) && is_string($_GET['municipio'])
+    ? trim($_GET['municipio']) : '';
+$busqueda = isset($_GET['buscar']) && is_string($_GET['buscar'])
+    ? trim($_GET['buscar']) : '';
+$municipios = [];
 $parques = [];
 $errorParques = '';
 
@@ -21,10 +25,21 @@ try {
 
         $parque['id'] = $parque['id'] ?? $firebaseId;
 
-        // Por ahora conservamos todos los parques.
-        // Después agregaremos el filtro por municipio.
-        $parques[] = $parque;
+        $municipioParque = trim((string)($parque['municipio'] ?? ''));
+        if ($municipioParque !== '') {
+            $municipios[$municipioParque] = $municipioParque;
+        }
+
+        $coincideMunicipio = $municipio === '' || $municipioParque === $municipio;
+        $coincideBusqueda = $busqueda === '' ||
+            mb_stripos((string)($parque['nombre'] ?? ''), $busqueda, 0, 'UTF-8') !== false;
+
+        if ($coincideMunicipio && $coincideBusqueda) {
+            $parques[] = $parque;
+        }
     }
+
+    natcasesort($municipios);
 
 } catch (Throwable $e) {
     $errorParques = 'No se pudieron cargar los parques.';
@@ -39,7 +54,7 @@ try {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="stylesheet" href="Css/Style.css">
     <link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
-    <title>Dividendo la venganza - Inicio</title>
+    <title>Parques | Dividendo</title>
 
     <style>
         .header-perfil-contenedor {
@@ -165,6 +180,31 @@ try {
             background-color: #f7f8f9;
             color: #d93025;
         }
+
+        .filtros-parques {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin: 20px 0;
+            align-items: center;
+        }
+        .filtros-parques input, .filtros-parques select {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            min-width: 190px;
+            max-width: 100%;
+        }
+        .filtros-parques button, .filtros-parques a {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            background: #00c864;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .filtros-parques a { background: #555; }
 
         .parques-container{
 
@@ -332,7 +372,7 @@ try {
                 </li>
 
                 <li class="nav-link">
-                    <a href="municipios.php">
+                    <a href="Parques.php">
                         <i class='bx bxs-tree-alt icon'></i>
                         <span class="text nav-text">Parques</span>
                     </a>
@@ -422,9 +462,31 @@ try {
         </div>
     </div>
 
-<div class="text">
-    Parques de <?php echo ucfirst($municipio); ?>
-</div>
+<div class="text">Explora nuestros parques</div>
+
+<form class="filtros-parques" method="GET" action="Parques.php">
+    <input type="search" name="buscar" placeholder="Buscar parque por nombre"
+        value="<?= htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8') ?>">
+
+    <select name="municipio" aria-label="Filtrar por municipio">
+        <option value="">Todos los municipios</option>
+        <?php foreach ($municipios as $opcion): ?>
+            <option value="<?= htmlspecialchars($opcion, ENT_QUOTES, 'UTF-8') ?>"
+                <?= $municipio === $opcion ? 'selected' : '' ?>>
+                <?= htmlspecialchars($opcion, ENT_QUOTES, 'UTF-8') ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
+    <button type="submit">Filtrar</button>
+    <a href="Parques.php">Limpiar</a>
+</form>
+
+<?php if ($errorParques !== ''): ?>
+    <p><?= htmlspecialchars($errorParques, ENT_QUOTES, 'UTF-8') ?></p>
+<?php elseif (empty($parques)): ?>
+    <p>No encontramos parques con esos filtros.</p>
+<?php endif; ?>
 
 <div class="parques-container">
 
