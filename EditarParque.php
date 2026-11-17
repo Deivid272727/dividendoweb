@@ -65,7 +65,7 @@ function escapar($valor): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Parque | Dividendo</title>
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="Css/admin.css">
 </head>
 
 <body>
@@ -78,8 +78,7 @@ function escapar($valor): string {
             <strong><?= escapar($parque['nombre'] ?? '') ?></strong>
         </p>
 
-        <form method="POST" action="GuardarEdicionParque.php">
-
+<form method="POST" action="GuardarEdicionParque.php" enctype="multipart/form-data">
         <input
     type="hidden"
     name="csrf_token"
@@ -166,6 +165,45 @@ function escapar($valor): string {
                 >
             </div>
 
+<div class="grupo">
+    <label>Fotografía actual</label>
+
+    <?php if (!empty($parque['imagenUrl'])): ?>
+        <div>
+            <img
+                src="<?= escapar($parque['imagenUrl']) ?>"
+                alt="Fotografía actual del parque"
+                style="width:250px;max-width:100%;border-radius:12px;margin-top:10px;"
+            >
+        </div>
+    <?php else: ?>
+        <p>Este parque no tiene fotografía.</p>
+    <?php endif; ?>
+</div>
+
+<div class="grupo">
+    <label for="imagenParque">Cambiar fotografía</label>
+
+    <input
+        type="file"
+        name="imagenParque"
+        id="imagenParque"
+        accept="image/jpeg,image/png,image/webp"
+    >
+
+    <small>
+        Opcional. Si no seleccionas una fotografía,
+        se conservará la actual. Máximo 5 MB.
+    </small>
+
+    <img
+        id="vistaPrevia"
+        alt="Vista previa de la nueva fotografía"
+        style="display:none;width:250px;max-width:100%;margin-top:15px;border-radius:12px;"
+    >
+</div>
+
+
             <div class="grupo">
                 <label>Meta de donaciones ($ MXN)</label>
                 <input
@@ -198,5 +236,39 @@ function escapar($valor): string {
         </form>
 
     </div>
+
+<script>
+document.getElementById('imagenParque').addEventListener('change', function () {
+    const archivo = this.files[0];
+    const vista = document.getElementById('vistaPrevia');
+
+    if (!archivo) {
+        vista.style.display = 'none';
+        vista.removeAttribute('src');
+        return;
+    }
+
+    const tiposPermitidos = [
+        'image/jpeg',
+        'image/png',
+        'image/webp'
+    ];
+
+    if (
+        !tiposPermitidos.includes(archivo.type) ||
+        archivo.size > 5 * 1024 * 1024
+    ) {
+        alert('Selecciona una imagen JPG, PNG o WebP de máximo 5 MB.');
+        this.value = '';
+        vista.style.display = 'none';
+        vista.removeAttribute('src');
+        return;
+    }
+
+    vista.src = URL.createObjectURL(archivo);
+    vista.style.display = 'block';
+});
+</script>
+
 </body>
 </html>
