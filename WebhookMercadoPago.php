@@ -156,8 +156,16 @@ try {
 
     // Exclusivamente operaciones de prueba.
     if (($pago['live_mode'] ?? null) !== false) {
-        responder(200, 'Pago fuera del entorno de pruebas');
-    }
+    error_log(
+        '[DIVIDENDO MP] Diagnostico live_mode: ' .
+        json_encode([
+            'live_mode' => $pago['live_mode'] ?? null,
+            'status' => $pago['status'] ?? null
+        ])
+    );
+
+    responder(200, 'Pago fuera del entorno de pruebas');
+}
 
     $referencia = $pago['external_reference'] ?? '';
 
