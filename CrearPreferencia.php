@@ -16,6 +16,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Verificar token CSRF
 $token = $_POST['csrf_token'] ?? '';
 
+error_log('=== DIAGNOSTICO CSRF ===');
+
+error_log('Sesion iniciada: ' .
+    (session_status() === PHP_SESSION_ACTIVE ? 'SI' : 'NO'));
+
+error_log('Token en sesion: ' .
+    (!empty($_SESSION['csrf_pago']) ? 'SI' : 'NO'));
+
+error_log('Token recibido: ' .
+    (is_string($token) && $token !== '' ? 'SI' : 'NO'));
+
+error_log('Tokens coinciden: ' .
+    (
+        is_string($token) &&
+        !empty($_SESSION['csrf_pago']) &&
+        hash_equals($_SESSION['csrf_pago'], $token)
+        ? 'SI' : 'NO'
+    ));
 if (
     !is_string($token) ||
     empty($_SESSION['csrf_pago']) ||
