@@ -1,7 +1,5 @@
-﻿<?php
+<?php
 session_start();
-
-// Verificar que el usuario haya iniciado sesión
 if (empty($_SESSION['user_id'])) {
     header('Location: Login.php');
     exit();
