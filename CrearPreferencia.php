@@ -164,12 +164,23 @@ try {
         JSON_THROW_ON_ERROR
     );
 
-    if ($codigoHttp < 200 || $codigoHttp >= 300) {
-        throw new RuntimeException(
-            'Mercado Pago rechazó la preferencia. HTTP ' .
-            $codigoHttp
-        );
-    }
+   if ($codigoHttp < 200 || $codigoHttp >= 300) {
+
+    error_log(
+        '[DIVIDENDO MP] HTTP ' . $codigoHttp .
+        ' | Respuesta de error: ' .
+        substr(
+            (string)($resultado['message'] ?? 'Sin mensaje'),
+            0,
+            300
+        )
+    );
+
+    throw new RuntimeException(
+        'Mercado Pago rechazó la preferencia. HTTP ' .
+        $codigoHttp
+    );
+}
 
     // Guardar la preferencia creada
     $database
@@ -199,8 +210,17 @@ try {
     exit();
 
 } catch (Throwable $e) {
-    error_log('Error Mercado Pago: ' . $e->getMessage());
+
+    error_log(
+        '[DIVIDENDO MP] ' .
+        get_class($e) . ': ' .
+        $e->getMessage()
+    );
 
     http_response_code(500);
-    exit('No se pudo iniciar el pago de prueba.');
+
+    exit(
+        'No se pudo iniciar el pago de prueba. ' .
+        'Revisa los logs de Render.'
+    );
 }
