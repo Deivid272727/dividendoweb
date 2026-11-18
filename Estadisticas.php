@@ -108,9 +108,18 @@ if (is_array($donaciones)) {
         }
 
         // No mezclar pagos reales con pruebas
-        if (($donacion['estado'] ?? '') !== 'simulada') {
-            continue;
-        }
+        $estadosPermitidos = [
+    'simulada',
+    'aprobada_prueba'
+];
+
+if (!in_array(
+    $donacion['estado'] ?? '',
+    $estadosPermitidos,
+    true
+)) {
+    continue;
+}
 
         $monto = (int)($donacion['montoCentavos'] ?? 0);
 
@@ -146,12 +155,14 @@ if (is_array($donaciones)) {
         }
 
         $movimientos[] = [
-            'parque' => $nombresParques[$parqueId]
-                ?? 'Parque no disponible',
-            'monto' => $monto,
-            'fecha' => $fecha,
-            'estado' => 'Simulada'
-        ];
+    'parque' => $nombresParques[$parqueId]
+        ?? 'Parque no disponible',
+    'monto' => $monto,
+    'fecha' => $fecha,
+    'estado' => ($donacion['estado'] ?? '') === 'aprobada_prueba'
+        ? 'Mercado Pago (prueba)'
+        : 'Simulada'
+];
     }
 }
 

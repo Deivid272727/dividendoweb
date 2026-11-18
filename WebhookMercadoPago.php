@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/config/firebase.php';
+
 use Kreait\Firebase\Database\Transaction;
 header('Content-Type: application/json; charset=utf-8');
 
@@ -8,6 +9,13 @@ function responder(int $codigo, string $mensaje): void
     http_response_code($codigo);
     echo json_encode(['mensaje' => $mensaje]);
     exit;
+}
+
+function idFirebaseValido($valor): bool
+{
+    return is_string($valor)
+        && $valor !== ''
+        && !preg_match('/[.#$\/\[\]\x00-\x1F\x7F]/', $valor);
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -22,21 +30,23 @@ if (!$secret || !$accessToken) {
     responder(503, 'Servicio no configurado');
 }
 
-// Leer el identificador del pago notificado.
+// Obtener el ID de pago enviado por Mercado Pago.
 $idPago = $_GET['data.id']
     ?? $_GET['data_id']
     ?? null;
 
-if (!is_string($idPago) ||
-    !preg_match('/^[0-9]{1,30}$/', $idPago)) {
+if (
+    !is_string($idPago) ||
+    !preg_match('/^[0-9]{1,30}$/', $idPago)
+) {
     responder(400, 'Identificador invalido');
 }
 
-// Validar la firma de Mercado Pago.
+// Validar firma.
 $firma = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
 $requestId = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';
 
-if (!$firma || !$requestId) {
+if ($firma === '' || $requestId === '') {
     responder(401, 'Firma ausente');
 }
 
@@ -60,20 +70,19 @@ if (
     responder(401, 'Firma invalida');
 }
 
-$segundos = (int) $ts;
+$segundos = (int)$ts;
 
 if ($segundos > 100000000000) {
-    $segundos = (int) floor($segundos / 1000);
+    $segundos = (int)floor($segundos / 1000);
 }
 
-// Evitar notificaciones demasiado antiguas.
 if (abs(time() - $segundos) > 600) {
     responder(401, 'Notificacion expirada');
 }
 
-$manifest = 'id:' . strtolower($idPago) .
-    ';request-id:' . $requestId .
-    ';ts:' . $ts . ';';
+$manifest = 'id:' . strtolower($idPago)
+    . ';request-id:' . $requestId
+    . ';ts:' . $ts . ';';
 
 $firmaEsperada = hash_hmac(
     'sha256',
@@ -86,11 +95,15 @@ if (!hash_equals($firmaEsperada, strtolower($v1))) {
 }
 
 try {
-    // Consultar directamente la API.
+    // Consultar el pago directamente con Mercado Pago.
     $ch = curl_init(
-        'https://api.mercadopago.com/v1/payments/' .
-        rawurlencode($idPago)
+        'https://api.mercadopago.com/v1/payments/'
+        . rawurlencode($idPago)
     );
+
+    if ($ch === false) {
+        throw new RuntimeException('No se pudo iniciar cURL');
+    }
 
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -101,12 +114,12 @@ try {
     ]);
 
     $respuesta = curl_exec($ch);
-    $codigo = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if ($respuesta === false || $codigo !== 200) {
+    if ($respuesta === false || $codigoHttp !== 200) {
         throw new RuntimeException(
-            'No se pudo consultar el pago'
+            'Error consultando Mercado Pago: HTTP ' . $codigoHttp
         );
     }
 
@@ -116,6 +129,20 @@ try {
         512,
         JSON_THROW_ON_ERROR
     );
+
+    if (!is_array($pago)) {
+        throw new RuntimeException('Respuesta de pago invalida');
+    }
+
+    // Confirmar que el ID consultado coincide.
+    if ((string)($pago['id'] ?? '') !== $idPago) {
+        throw new RuntimeException('ID de pago no coincide');
+    }
+
+    // Exclusivamente operaciones de prueba.
+    if (($pago['live_mode'] ?? null) !== false) {
+        responder(200, 'Pago fuera del entorno de pruebas');
+    }
 
     $referencia = $pago['external_reference'] ?? '';
 
@@ -128,36 +155,26 @@ try {
 
     $database = obtenerFirebaseDatabase();
 
-    $ref = $database->getReference(
+    $pagoRef = $database->getReference(
         'pagosPrueba/' . $referencia
     );
 
-    $registro = $ref->getValue();
+    $registro = $pagoRef->getValue();
 
     if (!is_array($registro)) {
-        responder(200, 'Pago no registrado');
+        responder(200, 'Referencia no registrada');
     }
 
-    // Validar que el pago corresponde a
-    // nuestra preferencia original.
-    $preferenciaGuardada =
-        (string)($registro['preferenciaId'] ?? '');
+    // Validar monto y moneda.
+    $montoEsperado = (int)($registro['montoCentavos'] ?? 0);
 
-    $preferenciaPago =
-        (string)($pago['order']['id'] ?? '');
-
-    // No confiar solamente en order.id,
-    // porque no siempre es preference_id.
-    // Comprobar la referencia, monto y moneda.
-    $montoEsperado =
-        (int)($registro['montoCentavos'] ?? 0);
-
-    $montoRecibido = (int) round(
+    $montoRecibido = (int)round(
         ((float)($pago['transaction_amount'] ?? 0)) * 100
     );
 
     if (
         $montoEsperado < 100 ||
+        $montoEsperado > 1000000 ||
         $montoEsperado !== $montoRecibido ||
         ($pago['currency_id'] ?? '') !== 'MXN'
     ) {
@@ -165,81 +182,134 @@ try {
         responder(200, 'Pago no coincide');
     }
 
-    // Este primer paso solamente verifica.
-    // NO aumenta la recaudacion.
-   
-if (($pago['status'] ?? '') === 'approved') {
+    // Validar la preferencia cuando el pago la informa.
+    $preferenciaGuardada = (string)(
+        $registro['preferenciaId'] ?? ''
+    );
 
-    // Aceptar exclusivamente operaciones de prueba.
-    if (($pago['live_mode'] ?? null) !== false) {
-        error_log('[DIVIDENDO MP] Pago no identificado como prueba');
-        responder(200, 'Entorno no permitido');
+    if ($preferenciaGuardada === '') {
+        throw new RuntimeException('Preferencia no registrada');
     }
 
-    $nuevoRegistro = false;
+    $preferenciaInformada = $pago['preference_id'] ?? null;
 
-    // La transaccion evita que dos notificaciones
-    // confirmen simultaneamente la misma referencia.
+    if (
+        $preferenciaInformada !== null &&
+        (string)$preferenciaInformada !== $preferenciaGuardada
+    ) {
+        error_log('[DIVIDENDO MP] Preferencia diferente');
+        responder(200, 'Preferencia no coincide');
+    }
+
+    // No asociar otra operacion a la misma referencia.
+    if (
+        !empty($registro['pagoId']) &&
+        (string)$registro['pagoId'] !== $idPago
+    ) {
+        responder(200, 'Referencia asociada a otro pago');
+    }
+
+    // Solo registrar pagos aprobados.
+    if (($pago['status'] ?? '') !== 'approved') {
+        responder(200, 'Pago no aprobado');
+    }
+
+    $idParque = $registro['parqueId'] ?? null;
+    $idUsuario = $registro['usuarioId'] ?? null;
+
+    if (
+        !idFirebaseValido($idParque) ||
+        !idFirebaseValido($idUsuario)
+    ) {
+        throw new RuntimeException('Parque o usuario invalido');
+    }
+
+    $parque = $database
+        ->getReference('parques/' . $idParque)
+        ->getValue();
+
+    if (!is_array($parque)) {
+        throw new RuntimeException('Parque no encontrado');
+    }
+
+    // ID deterministico: una referencia, una donacion.
+    $idDonacion = 'mp_' . $referencia;
+
+    $donacionRef = $database->getReference(
+        'donaciones/' . $idDonacion
+    );
+
+   
+    // Registrar la donacion una sola vez.
+    // La transaccion comprueba y escribe sobre
+    // la misma referencia de Firebase.
+
     $database->runTransaction(
         function (Transaction $transaction) use (
-            $ref,
+            $donacionRef,
+            $idDonacion,
+            $idParque,
+            $idUsuario,
+            $montoEsperado,
             $idPago,
-            &$nuevoRegistro
+            $referencia
         ) {
-            $snapshot = $transaction->getSnapshot($ref);
-            $actual = $snapshot->getValue();
+            $existente = $transaction->snapshot($donacionRef)->getValue();
 
-            if (!is_array($actual)) {
-                throw new RuntimeException(
-                    'Referencia de pago inexistente'
-                );
-            }
+            if ($existente !== null) {
+                // Una referencia no puede representar
+                // dos pagos diferentes.
+                if (
+                    !is_array($existente) ||
+                    (string)($existente['pagoId'] ?? '') !== $idPago ||
+                    (string)($existente['referenciaExterna'] ?? '') !== $referencia ||
+                    (string)($existente['parqueId'] ?? '') !== $idParque ||
+                    (string)($existente['usuarioId'] ?? '') !== $idUsuario ||
+                    (int)($existente['montoCentavos'] ?? 0) !== $montoEsperado ||
+                    ($existente['estado'] ?? '') !== 'aprobada_prueba'
+                ) {
+                    throw new RuntimeException(
+                        'Conflicto con una donacion existente'
+                    );
+                }
 
-            // Si ya esta verificado, no volver a registrarlo.
-            if (($actual['estado'] ?? '') === 'verificado') {
-                $nuevoRegistro = false;
+                // Ya fue registrada correctamente.
                 return;
             }
 
-            // No permitir asociar otra operacion a la misma referencia.
-            if (
-                !empty($actual['pagoId']) &&
-                (string)$actual['pagoId'] !== (string)$idPago
-            ) {
-                throw new RuntimeException(
-                    'Referencia asociada a otro pago'
-                );
-            }
-
-            $actual['estado'] = 'verificado';
-            $actual['pagoId'] = (string)$idPago;
-            $actual['fechaVerificacion'] = gmdate('c');
-
-            $transaction->set($ref, $actual);
-            $nuevoRegistro = true;
+            $transaction->set($donacionRef, [
+                'id' => $idDonacion,
+                'parqueId' => $idParque,
+                'usuarioId' => $idUsuario,
+                'montoCentavos' => $montoEsperado,
+                'estado' => 'aprobada_prueba',
+                'fecha' => gmdate('c'),
+                'pagoId' => $idPago,
+                'referenciaExterna' => $referencia
+            ]);
         }
     );
 
-    if ($nuevoRegistro) {
-        error_log(
-            '[DIVIDENDO MP] Pago registrado por primera vez: ' .
-            $idPago
-        );
-    } else {
-        error_log(
-            '[DIVIDENDO MP] Notificacion duplicada: ' .
-            $idPago
-        );
-    }
+    // Actualizar el estado despues de asegurar
+    // que la donacion ya existe.
+    $pagoRef->update([
+        'estado' => 'verificado',
+        'pagoId' => $idPago,
+        'fechaVerificacion' => gmdate('c')
+    ]);
 
-    responder(200, 'Pago de prueba verificado');
-}
-}
-catch (Throwable $e) {
     error_log(
-        '[DIVIDENDO MP] Webhook: ' .
-        $e->getMessage()
+        '[DIVIDENDO MP] Donacion de prueba verificada: ' .
+        $idPago
+    );
+
+    responder(200, 'Donacion de prueba verificada');
+
+} catch (Throwable $e) {
+    error_log(
+        '[DIVIDENDO MP] Webhook: ' . $e->getMessage()
     );
 
     responder(500, 'Error al verificar pago');
 }
+
