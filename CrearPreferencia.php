@@ -1,0 +1,187 @@
+<?php
+session_start();
+
+require_once __DIR__ . '/config/firebase.php';
+
+if (empty($_SESSION['user_id'])) {
+    header('Location: Login.php');
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    exit('Método no permitido.');
+}
+
+// Verificar token CSRF
+$token = $_POST['csrf_token'] ?? '';
+
+if (
+    !is_string($token) ||
+    empty($_SESSION['csrf_pago']) ||
+    !hash_equals($_SESSION['csrf_pago'], $token)
+) {
+    http_response_code(403);
+    exit('Solicitud no autorizada.');
+}
+
+$idParque = $_POST['parque_id'] ?? '';
+$montoTexto = $_POST['monto'] ?? '';
+
+if (
+    !is_string($idParque) ||
+    $idParque === '' ||
+    preg_match('/[.#$\[\]\/\x00-\x1F\x7F]/', $idParque)
+) {
+    http_response_code(400);
+    exit('Parque inválido.');
+}
+
+if (
+    !is_string($montoTexto) ||
+    !preg_match('/^\d{1,5}(\.\d{1,2})?$/', $montoTexto)
+) {
+    http_response_code(400);
+    exit('Monto inválido.');
+}
+
+$montoCentavos = (int) round((float)$montoTexto * 100);
+
+if ($montoCentavos < 100 || $montoCentavos > 1000000) {
+    http_response_code(400);
+    exit('Monto fuera de rango.');
+}
+
+$accessToken = getenv('MP_ACCESS_TOKEN');
+$appUrl = rtrim((string)getenv('APP_URL'), '/');
+
+if (
+    !$accessToken ||
+    !preg_match('#^https://[^/]+$#', $appUrl)
+) {
+    http_response_code(500);
+    exit('Configuración de Mercado Pago incompleta.');
+}
+
+try {
+    $database = obtenerFirebaseDatabase();
+
+    $parque = $database
+        ->getReference('parques/' . $idParque)
+        ->getValue();
+
+    if (!is_array($parque)) {
+        http_response_code(404);
+        exit('Parque no encontrado.');
+    }
+
+    $nombreParque = (string)(
+        $parque['nombre'] ?? 'Parque'
+    );
+
+    // Identificador único de la operación de prueba
+    $referenciaExterna = bin2hex(random_bytes(16));
+
+    $datos = [
+        'items' => [
+            [
+                'title' => 'Donación de prueba - ' . $nombreParque,
+                'quantity' => 1,
+                'currency_id' => 'MXN',
+                'unit_price' => $montoCentavos / 100
+            ]
+        ],
+        'external_reference' => $referenciaExterna,
+        'back_urls' => [
+            'success' => $appUrl . '/ResultadoPago.php',
+            'failure' => $appUrl . '/ResultadoPago.php',
+            'pending' => $appUrl . '/ResultadoPago.php'
+        ],
+        'auto_return' => 'approved'
+    ];
+
+    // Crear registro pendiente en Firebase
+    $database
+        ->getReference('pagosPrueba/' . $referenciaExterna)
+        ->set([
+            'parqueId' => $idParque,
+            'usuarioId' => (string)$_SESSION['user_id'],
+            'montoCentavos' => $montoCentavos,
+            'estado' => 'pendiente',
+            'fecha' => gmdate('c')
+        ]);
+
+    $ch = curl_init(
+        'https://api.mercadopago.com/checkout/preferences'
+    );
+
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $accessToken,
+            'Content-Type: application/json'
+        ],
+        CURLOPT_POSTFIELDS => json_encode(
+            $datos,
+            JSON_THROW_ON_ERROR
+        )
+    ]);
+
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if ($respuesta === false) {
+        throw new RuntimeException('Error de conexión con Mercado Pago.');
+    }
+
+    curl_close($ch);
+
+    $resultado = json_decode(
+        $respuesta,
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
+
+    if ($codigoHttp < 200 || $codigoHttp >= 300) {
+        throw new RuntimeException(
+            'Mercado Pago rechazó la preferencia. HTTP ' .
+            $codigoHttp
+        );
+    }
+
+    // Guardar la preferencia creada
+    $database
+        ->getReference('pagosPrueba/' . $referenciaExterna)
+        ->update([
+            'preferenciaId' => $resultado['id'] ?? ''
+        ]);
+
+    $urlPago = $resultado['sandbox_init_point'] ?? '';
+
+    if (
+        !is_string($urlPago) ||
+        !filter_var($urlPago, FILTER_VALIDATE_URL) ||
+        parse_url($urlPago, PHP_URL_SCHEME) !== 'https' ||
+        !in_array(
+            parse_url($urlPago, PHP_URL_HOST),
+            ['sandbox.mercadopago.com', 'www.mercadopago.com'],
+            true
+        )
+    ) {
+        throw new RuntimeException(
+            'Mercado Pago no devolvió una URL de prueba válida.'
+        );
+    }
+
+    header('Location: ' . $urlPago, true, 303);
+    exit();
+
+} catch (Throwable $e) {
+    error_log('Error Mercado Pago: ' . $e->getMessage());
+
+    http_response_code(500);
+    exit('No se pudo iniciar el pago de prueba.');
+}

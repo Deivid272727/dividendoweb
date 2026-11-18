@@ -3,6 +3,9 @@
 require_once __DIR__ . '/config/mercadopago/public_key.php';
 
 $id_parque = $_GET['id'] ?? '';
+if (empty($_SESSION['csrf_pago'])) {
+    $_SESSION['csrf_pago'] = bin2hex(random_bytes(32));
+}
 
 if (
     !is_string($id_parque) ||
@@ -42,11 +45,24 @@ $mpPublicKey = obtenerMercadoPagoPublicKey();
             </div>
 
             <div class="right-side">
-<form
-    id="payment-form"
-    method="POST"
-    action="ProcesarDonacion.php"
->
+<form action="CrearPreferencia.php" method="POST">
+
+    <input type="hidden" name="parque_id"
+           value="<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>">
+
+    <input type="hidden" name="csrf_token"
+           value="<?= htmlspecialchars($_SESSION['csrf_pago'], ENT_QUOTES, 'UTF-8') ?>">
+
+    <label>Monto de prueba (MXN)</label>
+
+    <input type="number" name="monto"
+           min="1" max="10000" step="0.01" required>
+
+    <button type="submit">
+        Continuar a Mercado Pago (prueba)
+    </button>
+
+</form>
 
                                    <input
                        type="hidden"
