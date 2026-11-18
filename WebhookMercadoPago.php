@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/config/firebase.php';
-
+use Kreait\Firebase\Database\Transaction;
 header('Content-Type: application/json; charset=utf-8');
 
 function responder(int $codigo, string $mensaje): void
@@ -167,18 +167,75 @@ try {
 
     // Este primer paso solamente verifica.
     // NO aumenta la recaudacion.
-    if (($pago['status'] ?? '') === 'approved') {
-        error_log(
-            '[DIVIDENDO MP] Pago de prueba verificado: ' .
-            $idPago
-        );
+   
+if (($pago['status'] ?? '') === 'approved') {
 
-        responder(200, 'Pago verificado');
+    // Aceptar exclusivamente operaciones de prueba.
+    if (($pago['live_mode'] ?? null) !== false) {
+        error_log('[DIVIDENDO MP] Pago no identificado como prueba');
+        responder(200, 'Entorno no permitido');
     }
 
-    responder(200, 'Pago no aprobado');
+    $nuevoRegistro = false;
 
-} catch (Throwable $e) {
+    // La transaccion evita que dos notificaciones
+    // confirmen simultaneamente la misma referencia.
+    $database->runTransaction(
+        function (Transaction $transaction) use (
+            $ref,
+            $idPago,
+            &$nuevoRegistro
+        ) {
+            $snapshot = $transaction->getSnapshot($ref);
+            $actual = $snapshot->getValue();
+
+            if (!is_array($actual)) {
+                throw new RuntimeException(
+                    'Referencia de pago inexistente'
+                );
+            }
+
+            // Si ya esta verificado, no volver a registrarlo.
+            if (($actual['estado'] ?? '') === 'verificado') {
+                $nuevoRegistro = false;
+                return;
+            }
+
+            // No permitir asociar otra operacion a la misma referencia.
+            if (
+                !empty($actual['pagoId']) &&
+                (string)$actual['pagoId'] !== (string)$idPago
+            ) {
+                throw new RuntimeException(
+                    'Referencia asociada a otro pago'
+                );
+            }
+
+            $actual['estado'] = 'verificado';
+            $actual['pagoId'] = (string)$idPago;
+            $actual['fechaVerificacion'] = gmdate('c');
+
+            $transaction->set($ref, $actual);
+            $nuevoRegistro = true;
+        }
+    );
+
+    if ($nuevoRegistro) {
+        error_log(
+            '[DIVIDENDO MP] Pago registrado por primera vez: ' .
+            $idPago
+        );
+    } else {
+        error_log(
+            '[DIVIDENDO MP] Notificacion duplicada: ' .
+            $idPago
+        );
+    }
+
+    responder(200, 'Pago de prueba verificado');
+}
+}
+catch (Throwable $e) {
     error_log(
         '[DIVIDENDO MP] Webhook: ' .
         $e->getMessage()

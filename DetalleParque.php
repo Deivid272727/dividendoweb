@@ -64,9 +64,20 @@ try {
             }
 
             // Excluir pagos reales y otros estados
-            if (($donacion['estado'] ?? '') !== 'simulada') {
-                continue;
-            }
+            // Contabilizar donaciones simuladas y pagos
+// de Mercado Pago verificados en pruebas.
+$estadosPermitidos = [
+    'simulada',
+    'aprobada_prueba'
+];
+
+if (!in_array(
+    $donacion['estado'] ?? '',
+    $estadosPermitidos,
+    true
+)) {
+    continue;
+}
 
             $centavos = (int)($donacion['montoCentavos'] ?? 0);
 
@@ -637,7 +648,7 @@ try {
 </p>
 
 <p>
-    <strong>Progreso de prueba:</strong>
+    <strong>Progreso de donaciones prueba:</strong>
     <?= round($porcentaje, 1) ?>%
 </p>
 
