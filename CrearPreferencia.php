@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Verificar token CSRF
+error_log('DIVIDENDO: CrearPreferencia.php ejecutado');
 $token = $_POST['csrf_token'] ?? '';
 
 error_log('=== DIAGNOSTICO CSRF ===');

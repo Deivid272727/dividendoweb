@@ -1,11 +1,20 @@
-﻿<?php
+﻿
+<?php
+session_start();
 
-require_once __DIR__ . '/config/mercadopago/public_key.php';
+// Verificar que el usuario haya iniciado sesión
+if (empty($_SESSION['user_id'])) {
+    header('Location: Login.php');
+    exit();
+}
 
-$id_parque = $_GET['id'] ?? '';
+// Generar token CSRF
 if (empty($_SESSION['csrf_pago'])) {
     $_SESSION['csrf_pago'] = bin2hex(random_bytes(32));
 }
+
+// Obtener ID del parque
+$id_parque = $_GET['id'] ?? '';
 
 if (
     !is_string($id_parque) ||
@@ -15,115 +24,155 @@ if (
     http_response_code(400);
     exit('ID de parque inválido.');
 }
-$mpPublicKey = obtenerMercadoPagoPublicKey();
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Finalizar Pago - Dividendo</title>
+
     <link rel="stylesheet" href="Css/pago.css">
-
-<script src="https://sdk.mercadopago.com/js/v2"></script>
-
 </head>
+
 <body>
-    <div class="payment-container">
-        <div class="payment-card">
-            <div class="left-side">
-                <img src="https://media1.tenor.com/m/PDVHdZ0XYJoAAAAC/cat-shield.gif" alt="Logo" class="payment-logo">
-                <h2>Resumen de Compra</h2>
-                <p>Propiedad Seleccionada</p>
-                <div class="total-section">
-                    <span>Monto a donar:</span>
-                    <h1 id="display-monto">$0</h1>
-                </div>
+
+<div class="payment-container">
+    <div class="payment-card">
+
+        <!-- LADO IZQUIERDO -->
+        <div class="left-side">
+
+            <img
+                src="https://media1.tenor.com/m/PDVHdZ0XYJoAAAAC/cat-shield.gif"
+                alt="Logo"
+                class="payment-logo"
+            >
+
+            <h2>Resumen de donación</h2>
+
+            <p>Donación de prueba para el parque seleccionado</p>
+
+            <div class="total-section">
+                <span>Monto a donar:</span>
+                <h1 id="display-monto">$0.00</h1>
             </div>
 
-            <div class="right-side">
-<form action="CrearPreferencia.php" method="POST">
+            <p>
+                Esta operación utiliza el entorno
+                de pruebas de Mercado Pago.
+                No se realizará un cobro real.
+            </p>
 
-    <input type="hidden" name="parque_id"
-           value="<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>">
+        </div>
 
-    <input type="hidden" name="csrf_token"
-           value="<?= htmlspecialchars($_SESSION['csrf_pago'], ENT_QUOTES, 'UTF-8') ?>">
+        <!-- LADO DERECHO -->
+        <div class="right-side">
 
-    <label>Monto de prueba (MXN)</label>
+            <h2>Realizar donación de prueba</h2>
 
-    <input type="number" name="monto"
-           min="1" max="10000" step="0.01" required>
+            <form
+                action="CrearPreferencia.php"
+                method="POST"
+                id="payment-form"
+            >
 
-    <button type="submit">
-        Continuar a Mercado Pago (prueba)
-    </button>
+                <!-- ID DEL PARQUE -->
+                <input
+                    type="hidden"
+                    name="parque_id"
+                    value="<?= htmlspecialchars(
+                        $id_parque,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                >
 
-</form>
+                <!-- TOKEN DE SEGURIDAD -->
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= htmlspecialchars(
+                        $_SESSION['csrf_pago'],
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ) ?>"
+                >
 
-                                   <input
-                       type="hidden"
-                     name="parque_id"
-                      value="<?php echo $id_parque; ?>">
+                <!-- MONTO -->
+                <div class="input-group">
 
-                    <div class="input-group">
-                        <label>Monto a donar ($)</label>
-<input
-    type="number"
-    name="monto"
-    id="input-monto"
-    min="1"
-    max="10000"
-    step="0.01"
-    placeholder="Ej: 500"
-    required
-    oninput="document.getElementById('display-monto').innerText = '$' + this.value"
->                    </div>
-<div id="mercadopago-card-container">
-    <h3>Pago seguro con Mercado Pago</h3>
-    <p>
-        Estamos preparando el formulario
-        de donaciones de prueba.
-    </p>
+                    <label for="input-monto">
+                        Monto de prueba (MXN)
+                    </label>
 
-    <div id="paymentBrick_container"></div>
+                    <input
+                        type="number"
+                        name="monto"
+                        id="input-monto"
+                        min="1"
+                        max="10000"
+                        step="0.01"
+                        placeholder="Ej: 100"
+                        required
+                    >
+
+                </div>
+
+                <div id="mercadopago-card-container">
+
+                    <h3>Pago seguro con Mercado Pago</h3>
+
+                    <p>
+                        Al continuar, serás redirigido
+                        al entorno de pruebas de
+                        Mercado Pago.
+                    </p>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="pay-btn"
+                >
+                    Continuar a Mercado Pago (prueba)
+                </button>
+
+            </form>
+
+            <a
+                href="DetalleParque.php?id=<?= urlencode($id_parque) ?>"
+                class="back-link"
+            >
+                Cancelar y volver
+            </a>
+
+        </div>
+
+    </div>
 </div>
 
-<button type="submit" class="pay-btn">
-    Registrar donación de prueba
-</button>                     <a
-                      href="DetalleParque.php?id=<?= urlencode($id_parque) ?>"
-                      class="back-link"> Cancelar y volver
-                     </a>
-                </form>
-            </div>
-        </div>
-    </div>
 <script>
-    const mpPublicKey = <?php echo json_encode($mpPublicKey); ?>;
+const inputMonto = document.getElementById('input-monto');
+const displayMonto = document.getElementById('display-monto');
 
-    if (mpPublicKey) {
-        const mp = new MercadoPago(mpPublicKey, {
-            locale: 'es-MX'
+inputMonto.addEventListener('input', function () {
+    const monto = Number(this.value);
+
+    displayMonto.textContent =
+        '$' + (
+            Number.isFinite(monto) && monto >= 0
+                ? monto
+                : 0
+        ).toLocaleString('es-MX', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
-
-        console.log('Mercado Pago inicializado correctamente');
-
-        // Buscar el contenedor del formulario
-        const contenedorPago = document.getElementById('paymentBrick_container');
-
-        if (contenedorPago) {
-            console.log('Contenedor de Mercado Pago encontrado');
-        } else {
-            console.error('No se encontrÃ³ el contenedor de pago');
-        }
-
-    } else {
-        console.error('No se encontrÃ³ la Public Key');
-    }
+});
 </script>
+
 </body>
 </html>
