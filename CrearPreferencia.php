@@ -210,8 +210,6 @@ if (
     );
 }
 
-header('Location: ' . $urlPago, true, 303);
-exit();
     header('Location: ' . $urlPago, true, 303);
     exit();
 
