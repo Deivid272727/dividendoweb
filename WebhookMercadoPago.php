@@ -6,6 +6,21 @@ header('Content-Type: application/json; charset=utf-8');
 
 function responder(int $codigo, string $mensaje): void
 {
+    $mensajesDiagnostico = [
+        'Pago fuera del entorno de pruebas',
+        'Referencia desconocida',
+        'Referencia no registrada',
+        'Pago no coincide',
+        'Preferencia no coincide',
+        'Referencia asociada a otro pago',
+        'Pago no aprobado',
+        'Donacion de prueba verificada'
+    ];
+
+    if (in_array($mensaje, $mensajesDiagnostico, true)) {
+        error_log('[DIVIDENDO MP] Resultado: ' . $mensaje);
+    }
+
     http_response_code($codigo);
     echo json_encode(['mensaje' => $mensaje]);
     exit;
