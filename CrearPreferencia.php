@@ -191,35 +191,34 @@ try {
 
     $urlPago = $resultado['sandbox_init_point'] ?? '';
 
-    error_log('[DIVIDENDO MP] Preferencia creada: ' .
-    (!empty($resultado['id']) ? 'SI' : 'NO'));
+$hostPago = is_string($urlPago)
+    ? parse_url($urlPago, PHP_URL_HOST)
+    : null;
 
-error_log('[DIVIDENDO MP] sandbox_init_point: ' .
-    (!empty($resultado['sandbox_init_point']) ? 'SI' : 'NO'));
-
-error_log('[DIVIDENDO MP] init_point: ' .
-    (!empty($resultado['init_point']) ? 'SI' : 'NO'));
-
-error_log('[DIVIDENDO MP] Host sandbox: ' .
-    (parse_url(
-        (string)($resultado['sandbox_init_point'] ?? ''),
+error_log('[DIVIDENDO MP] Diagnostico URL: ' . json_encode([
+    'sandbox_disponible' => !empty($resultado['sandbox_init_point']),
+    'init_disponible' => !empty($resultado['init_point']),
+    'host_sandbox' => $hostPago ?: 'VACIO',
+    'host_init' => parse_url(
+        (string)($resultado['init_point'] ?? ''),
         PHP_URL_HOST
-    ) ?: 'VACIO'));
-    if (
-        !is_string($urlPago) ||
-        !filter_var($urlPago, FILTER_VALIDATE_URL) ||
-        parse_url($urlPago, PHP_URL_SCHEME) !== 'https' ||
-        !in_array(
-            parse_url($urlPago, PHP_URL_HOST),
-            ['sandbox.mercadopago.com', 'www.mercadopago.com'],
-            true
-        )
-    ) {
-        throw new RuntimeException(
-            'Mercado Pago no devolvió una URL de prueba válida.'
-        );
-    }
+    ) ?: 'VACIO'
+]));
 
+if (
+    !is_string($urlPago) ||
+    !filter_var($urlPago, FILTER_VALIDATE_URL) ||
+    parse_url($urlPago, PHP_URL_SCHEME) !== 'https' ||
+    !in_array(
+        $hostPago,
+        ['sandbox.mercadopago.com', 'www.mercadopago.com'],
+        true
+    )
+) {
+    throw new RuntimeException(
+        'URL de prueba no disponible o dominio no permitido.'
+    );
+}
     header('Location: ' . $urlPago, true, 303);
     exit();
 
