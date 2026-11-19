@@ -182,13 +182,25 @@ try {
     );
 }
 
-    // Guardar la preferencia creada
+ 
+    // Validar que Mercado Pago devolvio una preferencia
+    $preferenciaId = $resultado['id'] ?? null;
+
+    if (!is_string($preferenciaId) || $preferenciaId === '') {
+        throw new RuntimeException(
+            'Mercado Pago no devolvio una preferencia valida.'
+        );
+    }
+
+    // Guardar la preferencia creada en Firebase
     $database
         ->getReference('pagosPrueba/' . $referenciaExterna)
         ->update([
-            'preferenciaId' => $resultado['id'] ?? ''
+            'preferenciaId' => $preferenciaId
         ]);
-$urlPago = $resultado['sandbox_init_point'] ?? '';
+
+    $urlPago = $resultado['sandbox_init_point'] ?? '';
+
 
 $hostPago = is_string($urlPago)
     ? parse_url($urlPago, PHP_URL_HOST)

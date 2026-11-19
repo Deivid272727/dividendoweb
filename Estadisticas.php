@@ -272,7 +272,7 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
         </div>
 
         <div class="tarjeta">
-            <h3>Usuarios registrados</h3>
+            <h3>Usuarios registrados hasta el momento</h3>
             <div class="numero">
                 <?= $totalUsuarios ?>
             </div>
@@ -287,13 +287,13 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
 
         <p class="nota-demo">
             Estas cantidades son simuladas.
-            No representan dinero recibido.
+            No representan dinero real aun.
         </p>
 
         <div class="tarjetas">
 
             <div class="tarjeta">
-                <h3>Total simulado</h3>
+                <h3>Total recaudado</h3>
                 <div class="numero">
                     <?= dinero($totalSimuladoCentavos) ?>
                 </div>

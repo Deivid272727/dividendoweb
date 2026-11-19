@@ -219,7 +219,6 @@ if (is_array($todasDonaciones)) {
                             <th>Parque</th>
                             <th>Monto</th>
                             <th>Fecha</th>
-                            <th>Estado</th>
                         </tr>
                     </thead>
 
