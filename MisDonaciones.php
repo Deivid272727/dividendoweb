@@ -252,12 +252,6 @@ if (is_array($todasDonaciones)) {
                                 }
                                 ?>
                             </td>
-
-                            <td class="simulada">
-                                <?= escapar(
-                                    ucfirst($donacion['estado'])
-                                ) ?>
-                            </td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
