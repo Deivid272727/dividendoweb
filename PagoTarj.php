@@ -400,10 +400,10 @@ if (
 
         <input type="text"
                id="numero"
-               placeholder="2026"
+               placeholder="1234 5678 9012 1234"
                maxlength="16"
                inputmode="numeric"
-               pattern="[0-9]{16}"
+               pattern="[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}"
                autocomplete="off"
                required>
     </div>
@@ -585,15 +585,18 @@ if (titular && numero && vencimiento && cvv && tarjeta) {
 
     numero.addEventListener('input', function () {
 
-        this.value = this.value
-            .replace(/\D/g, '')
-            .slice(0, 4);
+    let valor = this.value
+        .replace(/\D/g, '')
+        .slice(0, 16);
 
-        cardNumber.textContent =
-            '0000 0000 0000 ' +
-            this.value.padEnd(4, '•');
+    this.value = valor.replace(/(.{4})/g, '$1 ').trim();
 
-    });
+    let numeroCompleto = valor.padEnd(16, '•');
+
+    cardNumber.textContent =
+        numeroCompleto.match(/.{1,4}/g).join(' ');
+
+});
 
     vencimiento.addEventListener('input', function () {
 
@@ -626,7 +629,8 @@ if (titular && numero && vencimiento && cvv && tarjeta) {
     cvv.addEventListener('input', function () {
 
         this.value = this.value
-.replace(/\D/g, '')            .slice(0, 3);
+            .replace(/\D/g, '')
+            .slice(0, 3);
 
         cardCvv.textContent =
             this.value.padEnd(3, '•');
