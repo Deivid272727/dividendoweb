@@ -397,11 +397,11 @@ if (
     <label for="numero">Número de tarjeta</label>
 
     <div class="demo-number">
-
+                <span>0000</span>
         <input type="text"
                id="numero"
                placeholder="1234 5678 9012"
-               maxlength="12"
+               maxlength="14"
                inputmode="numeric"
                pattern="[0-9]{1,14} "
                autocomplete="off"
