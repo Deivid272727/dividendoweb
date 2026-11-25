@@ -587,11 +587,11 @@ if (titular && numero && vencimiento && cvv && tarjeta) {
 
     let valor = this.value
         .replace(/\D/g, '')
-        .slice(0, 16);
+        .slice(0, 12);
 
     this.value = valor.replace(/(.{4})/g, '$1 ').trim();
 
-    let numeroCompleto = valor.padEnd(16, '•');
+    let numeroCompleto = '0000' + valor.padEnd(12, '•');
 
     cardNumber.textContent =
         numeroCompleto.match(/.{1,4}/g).join(' ');
