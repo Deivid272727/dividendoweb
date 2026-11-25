@@ -86,7 +86,7 @@ if (
             <i class="bx bx-check"></i>
         </div>
 
-        <span class="demo-badge">DONACIÓN SIMULADA</span>
+        <span class="demo-badge">DONACIÓN</span>
 
         <h1>¡Gracias por tu donación!</h1>
 
@@ -124,7 +124,7 @@ if (
             <div class="receipt-row">
                 <span>Estado</span>
                 <strong class="approved">
-                    Simulación exitosa
+                    Donación exitosa
                 </strong>
             </div>
 
@@ -152,7 +152,7 @@ if (
 
             <div class="brand">
                 <i class="bx bxs-leaf"></i>
-                dividendo<span>.</span>
+                Dividendo<span>.</span>
             </div>
 
             <span class="demo-badge">
@@ -168,39 +168,75 @@ if (
 
             <!-- TARJETA VIRTUAL -->
 
-            <div class="virtual-card">
 
-                <div class="card-top">
+<div class="virtual-card" id="virtual-card">
 
-                    <span>dividendo.</span>
+    <div class="card-inner">
 
-                    <i class="bx bx-wifi"></i>
+        <!-- Frente de la tarjeta -->
 
+        <div class="card-front">
+
+            <div class="card-top">
+                <span>Dividendo.</span>
+                <i class="bx bx-wifi"></i>
+            </div>
+
+            <div class="card-chip"></div>
+
+            <div class="card-number" id="card-number">
+                0000 0000 0000 ••••
+            </div>
+
+            <div class="card-bottom">
+
+                <div>
+                    <small>Titular</small>
+                    <strong id="card-holder">
+                        NOMBRE 
+                    </strong>
                 </div>
 
-                <div class="card-chip"></div>
-
-                <div class="card-number">
-                    •••• •••• •••• 2026
+                <div>
+                    <small>Vencimiento</small>
+                    <strong id="card-expiry">MM/AA</strong>
                 </div>
 
-                <div class="card-bottom">
+                <i class="bx bxs-leaf"></i>
 
-                    <div>
-                        <small>TITULAR DEMO</small>
-                        <strong>DIVIDENDO DEMO</strong>
-                    </div>
+            </div>
 
-                    <div>
-                        <small>VENCIMIENTO</small>
-                        <strong>12/30</strong>
-                    </div>
+        </div>
 
-                    <i class="bx bxs-leaf"></i>
+        <!-- Reverso de la tarjeta -->
 
+        <div class="card-back">
+
+            <div class="magnetic-strip"></div>
+
+            <div class="signature-area">
+
+                <span>DIVIDENDO</span>
+
+                <div class="cvv-display" id="card-cvv">
+                    •••
                 </div>
 
             </div>
+
+            <p>Tarjeta de demostración académica</p>
+
+            <div class="back-brand">
+                <i class="bx bxs-leaf"></i>
+                dividendo.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 
             <!-- RESUMEN -->
 
@@ -225,7 +261,7 @@ if (
                 <div class="summary-row">
 
                     <span>Método</span>
-                    <strong>Tarjeta demo</strong>
+                    <strong>Tarjeta</strong>
 
                 </div>
 
@@ -328,7 +364,7 @@ if (
 
                 <div class="section-divider"></div>
 
-                <h3>Método de pago simulado</h3>
+                <h3>Método de pago</h3>
 
                 <div class="payment-method">
 
@@ -345,55 +381,67 @@ if (
 
                 <!-- DATOS EXCLUSIVAMENTE FICTICIOS -->
 
-                <div class="input-group">
+                
+<div class="input-group">
+    <label for="titular">Nombre del titular</label>
 
-                    <label>Titular de demostración</label>
+    <input type="text"
+           id="titular"
+           placeholder="Nombre de demostración"
+           maxlength="30"
+           autocomplete="off"
+           required>
+</div>
 
-                    <input type="text"
-                           value="DIVIDENDO DEMO"
-                           readonly>
+<div class="input-group">
+    <label for="numero">Número de tarjeta</label>
 
-                </div>
+    <div class="demo-number">
+        <span>0000 0000 0000</span>
 
-                <div class="input-group">
+        <input type="text"
+               id="numero"
+               placeholder="2026"
+               maxlength="4"
+               inputmode="numeric"
+               pattern="[0-9]{4}"
+               autocomplete="off"
+               required>
+    </div>
+</div>
 
-                    <label>Número de tarjeta ficticia</label>
+<div class="input-row">
 
-                    <div class="input-icon">
+    <div class="input-group">
+        <label for="vencimiento">Vencimiento</label>
 
-                        <i class="bx bx-credit-card"></i>
+        <input type="text"
+               id="vencimiento"
+               placeholder="MM/AA"
+               maxlength="5"
+               inputmode="numeric"
+               pattern="(0[1-9]|1[0-2])/[0-9]{2}"
+               autocomplete="off"
+               required>
+    </div>
 
-                        <input type="text"
-                               value="0000 0000 0000 2026"
-                               readonly>
+    <div class="input-group">
+        <label for="cvv">CVV </label>
 
-                    </div>
+        <input type="text"
+               id="cvv"
+               placeholder="000"
+               maxlength="3"
+               inputmode="numeric"
+               pattern="000"
+               autocomplete="off"
+               required>
 
-                </div>
+        <small>Utiliza 000 para la prueba.</small>
+    </div>
 
-                <div class="input-row">
+</div>
 
-                    <div class="input-group">
-
-                        <label>Vencimiento</label>
-
-                        <input type="text"
-                               value="12/30"
-                               readonly>
-
-                    </div>
-
-                    <div class="input-group">
-
-                        <label>CVV ficticio</label>
-
-                        <input type="text"
-                               value="•••"
-                               readonly>
-
-                    </div>
-
-                </div>
 
                 <div class="demo-notice">
 
@@ -413,7 +461,7 @@ if (
 
                     <i class="bx bx-lock-alt"></i>
 
-                    Confirmar donación simulada
+                    Confirmar donación 
 
                 </button>
 
@@ -516,6 +564,80 @@ if (form && payButton) {
     });
 
 }
+
+const titular = document.getElementById('titular');
+const numero = document.getElementById('numero');
+const vencimiento = document.getElementById('vencimiento');
+const cvv = document.getElementById('cvv');
+
+const tarjeta = document.getElementById('virtual-card');
+const cardHolder = document.getElementById('card-holder');
+const cardNumber = document.getElementById('card-number');
+const cardExpiry = document.getElementById('card-expiry');
+const cardCvv = document.getElementById('card-cvv');
+
+if (titular && numero && vencimiento && cvv && tarjeta) {
+
+    titular.addEventListener('input', function () {
+
+        cardHolder.textContent =
+            this.value.trim().toUpperCase() || 'NOMBRE DEMO';
+
+    });
+
+    numero.addEventListener('input', function () {
+
+        this.value = this.value
+            .replace(/\D/g, '')
+            .slice(0, 4);
+
+        cardNumber.textContent =
+            '0000 0000 0000 ' +
+            this.value.padEnd(4, '•');
+
+    });
+
+    vencimiento.addEventListener('input', function () {
+
+        let valor = this.value
+            .replace(/\D/g, '')
+            .slice(0, 4);
+
+        if (valor.length > 2) {
+            valor = valor.slice(0, 2) + '/' + valor.slice(2);
+        }
+
+        this.value = valor;
+
+        cardExpiry.textContent = valor || 'MM/AA';
+
+    });
+
+    cvv.addEventListener('focus', function () {
+
+        tarjeta.classList.add('flipped');
+
+    });
+
+    cvv.addEventListener('blur', function () {
+
+        tarjeta.classList.remove('flipped');
+
+    });
+
+    cvv.addEventListener('input', function () {
+
+        this.value = this.value
+            .replace(/[^0]/g, '')
+            .slice(0, 3);
+
+        cardCvv.textContent =
+            this.value.padEnd(3, '•');
+
+    });
+
+}
+
 
 </script>
 
