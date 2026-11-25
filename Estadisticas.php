@@ -106,12 +106,7 @@ if (is_array($donaciones)) {
         if (!is_array($donacion)) {
             continue;
         }
-
-        // No mezclar pagos reales con pruebas
-        $estadosPermitidos = [
-    'simulada',
-    'aprobada_prueba'
-];
+;
 
 if (!in_array(
     $donacion['estado'] ?? '',
@@ -158,10 +153,7 @@ if (!in_array(
     'parque' => $nombresParques[$parqueId]
         ?? 'Parque no disponible',
     'monto' => $monto,
-    'fecha' => $fecha,
-    'estado' => ($donacion['estado'] ?? '') === 'aprobada_prueba'
-        ? 'Mercado Pago (prueba)'
-        : 'Simulada'
+    'fecha' => $fecha
 ];
     }
 }
@@ -283,12 +275,7 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
     <!-- ESTADÍSTICAS DE DONACIONES -->
 
     <section class="seccion">
-        <h2>Donaciones de prueba</h2>
-
-        <p class="nota-demo">
-            Estas cantidades son simuladas.
-            No representan dinero real aun.
-        </p>
+        <h2>Donaciones</h2>
 
         <div class="tarjetas">
 
@@ -311,7 +298,7 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
                 <div class="numero">
                     <?= $totalDonadores ?>
                 </div>
-            </div>
+            </div> 
 
             <div class="tarjeta">
                 <h3>Parques beneficiados</h3>
@@ -367,11 +354,11 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
     <!-- DONACIONES POR PARQUE -->
 
     <section class="seccion">
-        <h2>Donaciones simuladas por parque</h2>
+        <h2>Donaciones por parque</h2>
 
         <?php if (empty($donacionesPorParque)): ?>
 
-            <p>Todavía no hay donaciones simuladas.</p>
+            <p>Todavía no hay donaciones.</p>
 
         <?php else: ?>
 
@@ -417,7 +404,7 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
     <!-- MOVIMIENTOS RECIENTES -->
 
     <section class="seccion">
-        <h2>Últimas donaciones simuladas</h2>
+        <h2>Últimas donaciones</h2>
 
         <?php if (empty($movimientosRecientes)): ?>
 
