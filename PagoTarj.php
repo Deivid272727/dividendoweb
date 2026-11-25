@@ -403,7 +403,7 @@ if (
                placeholder="1234 5678 9012"
                maxlength="14"
                inputmode="numeric"
-               pattern="[0-9]{1,14} "
+               pattern="[0-9]{4} [0-9]{4} [0-9]{4} "
                autocomplete="off"
                required>
     </div>
