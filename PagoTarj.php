@@ -387,7 +387,7 @@ if (
 
     <input type="text"
            id="titular"
-           placeholder="Nombre de demostración"
+           placeholder="Nombre"
            maxlength="30"
            autocomplete="off"
            required>
@@ -403,7 +403,7 @@ if (
                placeholder="2026"
                maxlength="16"
                inputmode="numeric"
-               pattern="[0-9]{4}"
+               pattern="[0-9]{16}"
                autocomplete="off"
                required>
     </div>
@@ -432,6 +432,7 @@ if (
                placeholder="000"
                maxlength="3"
                inputmode="numeric"
+               pattern="[0-9]{3}"
                autocomplete="off"
                required>
 
@@ -625,8 +626,7 @@ if (titular && numero && vencimiento && cvv && tarjeta) {
     cvv.addEventListener('input', function () {
 
         this.value = this.value
-            .replace(/[^0]/g, '')
-            .slice(0, 3);
+.replace(/\D/g, '')            .slice(0, 3);
 
         cardCvv.textContent =
             this.value.padEnd(3, '•');

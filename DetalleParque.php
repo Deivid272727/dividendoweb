@@ -648,7 +648,7 @@ try {
 </p>
 
 <p>
-    <strong>Progreso de donaciones prueba:</strong>
+    <strong>Progreso de donaciones:</strong>
     <?= round($porcentaje, 1) ?>%
 </p>
 
