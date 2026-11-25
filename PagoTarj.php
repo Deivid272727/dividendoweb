@@ -371,8 +371,8 @@ if (
                     <i class="bx bx-credit-card"></i>
 
                     <div>
-                        <strong>Tarjeta de demostración</strong>
-                        <small>Datos ficticios precargados</small>
+                        <strong>Tarjeta</strong>
+                        <small>Datos  precargados</small>
                     </div>
 
                     <i class="bx bxs-check-circle"></i>
@@ -397,12 +397,11 @@ if (
     <label for="numero">Número de tarjeta</label>
 
     <div class="demo-number">
-        <span>0000 0000 0000</span>
 
         <input type="text"
                id="numero"
                placeholder="2026"
-               maxlength="4"
+               maxlength="16"
                inputmode="numeric"
                pattern="[0-9]{4}"
                autocomplete="off"
@@ -433,11 +432,9 @@ if (
                placeholder="000"
                maxlength="3"
                inputmode="numeric"
-               pattern="000"
                autocomplete="off"
                required>
 
-        <small>Utiliza 000 para la prueba.</small>
     </div>
 
 </div>
