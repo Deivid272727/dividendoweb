@@ -350,7 +350,7 @@ body.dark .ods-info a{
                 <li class="nav-link">
                     <a href="index.php">
                         <i class="bx bx-home-alt icon"></i>
-                        <span class="text nav-text">Casitá</span>
+                        <span class="text nav-text">Inicio</span>
                     </a>
                 </li>
 
@@ -475,7 +475,7 @@ body.dark .ods-info a{
         </div>
     </div>
 
-    <div class="text">Casitaaa</div>
+    <div class="text">Inicio</div>
 
     <section class="hero">
 

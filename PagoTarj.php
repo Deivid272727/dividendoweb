@@ -400,10 +400,10 @@ if (
 
         <input type="text"
                id="numero"
-               placeholder="1234 5678 9012 1234"
-               maxlength="16"
+               placeholder="1234 5678 9012"
+               maxlength="12"
                inputmode="numeric"
-               pattern="[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}"
+               pattern="[0-9]{4} [0-9]{4} [0-9]{4}"
                autocomplete="off"
                required>
     </div>
