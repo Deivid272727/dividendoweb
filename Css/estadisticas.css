@@ -149,3 +149,27 @@ body {
         font-size: 25px;
     }
 }
+/* AJUSTES DEL MODO OSCURO */
+
+body.dark {
+    --color-principal: #4ade80;
+    --color-principal-hover: #22c55e;
+    color-scheme: dark;
+}
+
+body.dark .tabla-donaciones th {
+    color: var(--texto);
+}
+
+body.dark .tabla-donaciones td {
+    color: var(--texto-secundario);
+}
+
+body.dark .tabla-donaciones th,
+body.dark .tabla-donaciones td {
+    border-bottom-color: var(--borde);
+}
+
+body.dark .tabla-donaciones tbody tr:hover {
+    background: rgba(255, 255, 255, .04);
+}

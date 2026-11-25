@@ -107,11 +107,8 @@ if (is_array($donaciones)) {
             continue;
         }
 
-        // No mezclar pagos reales con pruebas
-        $estadosPermitidos = [
-    'simulada',
-    'aprobada_prueba'
-];
+        // Contabilizar únicamente donaciones simuladas
+        $estadosPermitidos = ['simulada'];
 
 if (!in_array(
     $donacion['estado'] ?? '',
@@ -131,6 +128,11 @@ if (!in_array(
         $parqueId = (string)($donacion['parqueId'] ?? '');
         $fecha = (string)($donacion['fecha'] ?? '');
 
+        // Excluir donaciones de parques eliminados
+        if (!isset($nombresParques[$parqueId])) {
+            continue;
+        }
+
         $totalDonaciones++;
         $totalSimuladoCentavos += $monto;
 
@@ -143,8 +145,7 @@ if (!in_array(
 
             if (!isset($donacionesPorParque[$parqueId])) {
                 $donacionesPorParque[$parqueId] = [
-                    'nombre' => $nombresParques[$parqueId]
-                        ?? 'Parque no disponible',
+                    'nombre' => $nombresParques[$parqueId],
                     'centavos' => 0,
                     'cantidad' => 0
                 ];
@@ -155,8 +156,7 @@ if (!in_array(
         }
 
         $movimientos[] = [
-    'parque' => $nombresParques[$parqueId]
-        ?? 'Parque no disponible',
+    'parque' => $nombresParques[$parqueId],
     'monto' => $monto,
     'fecha' => $fecha
 ];
@@ -219,11 +219,6 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
             font-weight: bold;
         }
 
-        .estado-demo {
-            color: #e0a82e;
-            font-weight: bold;
-        }
-
         .nota-demo {
             margin-top: 12px;
             opacity: 0.8;
@@ -281,6 +276,7 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
 
     <section class="seccion">
         <h2>Donaciones</h2>
+        <p class="nota-demo">Demostración académica. No se realizaron cobros reales.</p>
 
         <div class="tarjetas">
 
@@ -424,9 +420,8 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
                         <tr>
                             <th>Parque</th>
                             <th>Monto</th>
-                            <th>Fecha</th>
-                            <th>Estado</th>
-                        </tr>
+                            <th>Fecha</th>    
+                    </tr>
                     </thead>
 
                     <tbody>
@@ -460,10 +455,6 @@ $movimientosRecientes = array_slice($movimientos, 0, 10);
                                     echo 'Sin fecha';
                                 }
                                 ?>
-                            </td>
-
-                            <td class="estado-demo">
-                                <?= escapar($movimiento['estado']) ?>
                             </td>
                         </tr>
 

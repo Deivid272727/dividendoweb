@@ -876,3 +876,108 @@ label {
     }
 
 }
+/* =================================
+   MODO OSCURO - DIVIDENDO
+================================= */
+
+body.dark {
+    --primary: #4ade80;
+    --primary-dark: #166534;
+    --primary-light: #173c2d;
+    --background: #111827;
+    --text: #f1f5f9;
+    --muted: #a8b8b0;
+    --border: #374151;
+    --white: #19232d;
+
+    color-scheme: dark;
+
+    background: radial-gradient(
+        circle at top left,
+        #163b2c,
+        #111827 65%
+    );
+}
+
+body.dark .payment-card,
+body.dark .success-card {
+    background: #19232d;
+    border: 1px solid var(--border);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, .45);
+}
+
+body.dark .right-side {
+    background: #19232d;
+    color: var(--text);
+}
+
+body.dark .amount-btn {
+    background: #202d38;
+    color: var(--text);
+    border-color: var(--border);
+}
+
+body.dark .amount-btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+body.dark .amount-btn.active {
+    background: #168454;
+    border-color: #168454;
+    color: #ffffff;
+}
+
+body.dark .input-group input {
+    background: #111827;
+    color: var(--text);
+    border-color: var(--border);
+}
+
+body.dark .input-group input::placeholder {
+    color: #82918a;
+}
+
+body.dark .input-group input[readonly],
+body.dark .demo-number span {
+    background: #25333e;
+    color: var(--muted);
+}
+
+body.dark .payment-method {
+    background: #173c2d;
+    border-color: #28563e;
+}
+
+body.dark .demo-notice {
+    background: #25333e;
+    color: #b6c8bf;
+}
+
+body.dark .receipt {
+    background: #111827;
+}
+
+body.dark .back-link {
+    color: var(--muted);
+}
+
+body.dark .back-link:hover {
+    color: var(--primary);
+}
+
+/* VENTANA DE CONFIRMACION */
+
+body.dark .swal2-popup {
+    background: #19232d !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark .swal2-title,
+body.dark .swal2-html-container {
+    color: #f1f5f9 !important;
+}
+
+body.dark .swal2-html-container h2 {
+    color: #4ade80 !important;
+}
