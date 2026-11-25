@@ -70,6 +70,7 @@ if (
 
     <link rel="stylesheet"
           href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css">
+          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -118,7 +119,7 @@ if (
 
             <div class="receipt-row">
                 <span>Método</span>
-                <strong>Tarjeta de demostración</strong>
+                <strong>Tarjeta</strong>
             </div>
 
             <div class="receipt-row">
@@ -154,10 +155,6 @@ if (
                 <i class="bx bxs-leaf"></i>
                 Dividendo<span>.</span>
             </div>
-
-            <span class="demo-badge">
-                MODO DEMOSTRACIÓN
-            </span>
 
             <h1>Pequeñas acciones.<br>Grandes cambios.</h1>
 
@@ -224,7 +221,7 @@ if (
 
             </div>
 
-            <p>Tarjeta de demostración académica</p>
+            <p>Tarjeta para demostración</p>
 
             <div class="back-brand">
                 <i class="bx bxs-leaf"></i>
@@ -641,6 +638,44 @@ if (titular && numero && vencimiento && cvv && tarjeta) {
 
 
 </script>
+<?php if ($donacionExitosa): ?>
 
+<script>
+
+Swal.fire({
+    icon: 'success',
+    title: '¡Donación exitosa!',
+    html: `
+        <p>Tu pago se ha hechooo.</p>
+
+        <h2 style="color: #168454; margin: 20px 0;">
+            $<?= number_format(
+                $donacionExitosa['montoCentavos'] / 100,
+                2
+            ) ?> MXN
+        </h2>
+
+        <p>¡Gracias por contribuir a un futuro más verde!</p>
+
+        <small>No se realizó ningún cobro real ntp :).</small>
+    `,
+    confirmButtonText: 'Aceptar',
+    confirmButtonColor: '#168454',
+    background: '#ffffff',
+    color: '#20332a',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    width: 450
+
+}).then(() => {
+
+    window.location.href =
+        'DetalleParque.php?id=<?= urlencode($id_parque) ?>';
+
+});
+
+</script>
+
+<?php endif; ?>
 </body>
 </html>
