@@ -106,7 +106,12 @@ if (is_array($donaciones)) {
         if (!is_array($donacion)) {
             continue;
         }
-;
+
+        // No mezclar pagos reales con pruebas
+        $estadosPermitidos = [
+    'simulada',
+    'aprobada_prueba'
+];
 
 if (!in_array(
     $donacion['estado'] ?? '',
