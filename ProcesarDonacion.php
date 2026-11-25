@@ -68,12 +68,23 @@ try {
         'fecha' => gmdate('c')
     ]);
 
-    header(
-        'Location: DetalleParque.php?id=' .
-        urlencode($idParque) .
-        '&donacion_demo=1'
-    );
-    exit();
+   unset($_SESSION['csrf_pago']);
+
+$_SESSION['donacion_exitosa'] = [
+    'id' => $idDonacion,
+    'parqueId' => $idParque,
+    'montoCentavos' => $montoCentavos
+];
+
+header(
+    'Location: PagoTarj.php?id=' .
+    urlencode($idParque) .
+    '&resultado=exito',
+    true,
+    303
+);
+
+exit();
 
 } catch (Throwable $e) {
     error_log('Error registrando donación demo: ' . $e->getMessage());
