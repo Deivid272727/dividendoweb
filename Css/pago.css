@@ -1,138 +1,696 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #168454;
+    --primary-dark: #104936;
+    --primary-light: #e8f6ee;
+    --background: #edf3ef;
+    --text: #20332a;
+    --muted: #748179;
+    --border: #dce5df;
+    --white: #ffffff;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
 }
 
 body {
-    background: #0f0f0f;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(
+        circle at top left,
+        #d2ebdb,
+        #f2f6f3 65%
+    );
+    color: var(--text);
     min-height: 100vh;
 }
 
+button,
+input {
+    font-family: inherit;
+}
+
 .payment-container {
-    width: 90%;
-    max-width: 850px;
-    background: #1a1a1a;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0,255,68, 0.1);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
 }
 
 .payment-card {
-    display: flex;
-    flex-wrap: wrap;
+    width: 100%;
+    max-width: 1080px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: white;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 25px 80px rgba(20, 60, 40, 0.13);
+    animation: fadeIn 0.5s ease;
 }
+
+/* LADO IZQUIERDO */
 
 .left-side {
-    flex: 1;
-    background: #222;
-    padding: 40px;
+    padding: 45px;
+    background: linear-gradient(
+        145deg,
+        #0d3328,
+        #155940
+    );
     color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    border-right: 1px solid #333;
+    position: relative;
 }
 
-.payment-logo {
-    width: 80px;
+.brand {
+    display: flex;
+    align-items: center;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    margin-bottom: 35px;
+}
+
+.brand i {
+    font-size: 34px;
+    color: #8be9a8;
+    margin-right: 10px;
+}
+
+.brand span {
+    color: #8be9a8;
+}
+
+.demo-badge {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    padding: 8px 13px;
+    border-radius: 30px;
+    background: rgba(139, 233, 168, 0.15);
+    color: #a6edba;
+}
+
+.left-side h1 {
+    font-size: 32px;
+    line-height: 1.3;
+    margin: 20px 0 12px;
+}
+
+.intro {
+    font-size: 14px;
+    color: #bdd6c8;
+    line-height: 1.8;
+}
+
+/* TARJETA VIRTUAL */
+
+.virtual-card {
+    position: relative;
+    overflow: hidden;
+    padding: 25px;
+    margin: 35px 0;
+    border-radius: 22px;
+    min-height: 220px;
+    background: linear-gradient(
+        125deg,
+        #2a9967,
+        #0c3b2a 85%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s ease;
+}
+
+.virtual-card:hover {
+    transform: translateY(-5px);
+}
+
+.virtual-card::before,
+.virtual-card::after {
+    content: '';
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.virtual-card::before {
+    right: -100px;
+    top: -70px;
+}
+
+.virtual-card::after {
+    right: -65px;
+    top: -40px;
+}
+
+.card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 22px;
+}
+
+.card-top i {
+    font-size: 26px;
+    transform: rotate(90deg);
+}
+
+.card-chip {
+    width: 46px;
+    height: 35px;
+    border-radius: 7px;
+    margin-top: 22px;
+    background: linear-gradient(
+        135deg,
+        #f3dda0,
+        #a78b45
+    );
+    position: relative;
+}
+
+.card-chip::after {
+    content: '';
+    position: absolute;
+    inset: 9px 13px;
+    border: 1px solid #9a8045;
+    border-radius: 3px;
+}
+
+.card-number {
+    font-size: 22px;
+    letter-spacing: 3px;
+    margin: 22px 0;
+    white-space: nowrap;
+}
+
+.card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.card-bottom small {
+    display: block;
+    font-size: 9px;
+    color: #a5cdb8;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.card-bottom strong {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.card-bottom i {
+    font-size: 32px;
+    color: #9ce8b4;
+}
+
+/* RESUMEN */
+
+.summary {
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.summary h3 {
+    font-size: 16px;
     margin-bottom: 20px;
 }
 
-.total-section {
-    margin-top: 30px;
-    color: #00ff44;
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    font-size: 12px;
+    margin-bottom: 15px;
 }
+
+.summary-row span {
+    color: #b7d3c4;
+}
+
+.summary-row strong {
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.summary-total {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 20px;
+    margin-top: 20px;
+}
+
+.summary-total span {
+    font-size: 13px;
+    color: #bdd6c8;
+}
+
+.summary-total h2 {
+    font-size: 30px;
+    color: #a0f2b8;
+    margin-top: 5px;
+}
+
+/* LADO DERECHO */
 
 .right-side {
-    flex: 1.2;
-    padding: 40px;
-    background: #1a1a1a;
-    color: white;
+    padding: 45px;
 }
 
-h3 { margin-bottom: 25px; color: #00ff44; }
+.right-side h2 {
+    font-size: 28px;
+    font-weight: 700;
+}
 
-.input-group {
-    margin-bottom: 20px;
+.subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 6px 0 28px;
+}
+
+.right-side h3 {
+    font-size: 16px;
+    margin-bottom: 16px;
 }
 
 label {
     display: block;
-    font-size: 12px;
-    margin-bottom: 8px;
-    color: #aaa;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 9px;
 }
 
-input {
-    width: 100%;
-    padding: 12px;
-    background: #2a2a2a;
-    border: 1px solid #444;
-    border-radius: 8px;
+/* MONTOS RÁPIDOS */
+
+.amount-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 9px;
+    margin-bottom: 20px;
+}
+
+.amount-btn {
+    padding: 13px 5px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.amount-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.amount-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
     color: white;
+}
+
+/* CAMPOS */
+
+.input-group {
+    margin-bottom: 18px;
+    min-width: 0;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
     outline: none;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    transition: all 0.2s ease;
 }
 
-input:focus {
-    border-color: #00ff44;
+.input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(22, 132, 84, 0.1);
 }
 
-.row {
+.input-group input[readonly] {
+    background: #f5f8f6;
+    color: #63736a;
+    cursor: default;
+}
+
+.input-icon {
+    position: relative;
+}
+
+.input-icon i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 20px;
+}
+
+.input-icon input {
+    padding-left: 43px;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 25px 0;
+}
+
+/* MÉTODO DE PAGO */
+
+.payment-method {
     display: flex;
-    gap: 20px;
+    align-items: center;
+    gap: 13px;
+    background: var(--primary-light);
+    border: 1px solid #b8dfc7;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 22px;
 }
+
+.payment-method > i {
+    font-size: 25px;
+    color: var(--primary);
+}
+
+.payment-method div {
+    flex: 1;
+}
+
+.payment-method strong {
+    font-size: 12px;
+}
+
+.payment-method small {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.demo-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 13px;
+    background: #f1f6f3;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    color: #567063;
+}
+
+.demo-notice i {
+    font-size: 20px;
+}
+
+.demo-notice p {
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+/* BOTÓN PRINCIPAL */
 
 .pay-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
     width: 100%;
-    padding: 15px;
-    background: #00ff44;
+    padding: 16px;
     border: none;
-    border-radius: 8px;
-    font-weight: bold;
+    border-radius: 12px;
+    background: linear-gradient(
+        135deg,
+        #209b60,
+        #117448
+    );
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
     cursor: pointer;
-    transition: 0.3s;
-    margin-top: 10px;
+    transition: all 0.25s ease;
 }
 
 .pay-btn:hover {
-    background: #00cc36;
-    transform: scale(1.02);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(22, 132, 84, 0.25);
+}
+
+.pay-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+    transform: none;
+}
+
+.pay-btn i {
+    font-size: 19px;
 }
 
 .back-link {
-    display: block;
-    text-align: center;
-    margin-top: 20px;
-    color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 22px;
+    color: var(--muted);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
 }
 
-.back-link:hover { color: white; }
-
-/* Mobile */
-@media (max-width: 600px) {
-    .payment-card { flex-direction: column; }
-    .left-side { padding: 20px; text-align: center; }
+.back-link:hover {
+    color: var(--primary);
 }
-/* Ajuste para que los inputs tipo number se vean igual a los de text */
-input[type="number"] {
+
+/* PANTALLA DE ÉXITO */
+
+.success-card {
     width: 100%;
-    padding: 12px;
-    background: #2a2a2a;
-    border: 1px solid #444;
-    border-radius: 8px;
-    color: white;
+    max-width: 520px;
+    background: white;
+    padding: 45px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(20, 60, 40, 0.12);
+    animation: fadeIn 0.5s ease;
 }
 
-/* Para ocultar las flechitas del input de número */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+.success-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 95px;
+    height: 95px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 50%;
+    font-size: 65px;
+    margin: 0 auto 22px;
+    animation: popIn 0.5s ease;
+}
+
+.success-card .demo-badge {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.success-card h1 {
+    font-size: 27px;
+    margin: 20px 0 10px;
+}
+
+.success-card p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.success-amount {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 25px 0;
+}
+
+.receipt {
+    background: #f5f8f6;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 12px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.receipt-row:last-child {
+    border-bottom: none;
+}
+
+.receipt-row span {
+    color: var(--muted);
+}
+
+.receipt-row strong {
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.approved {
+    color: var(--primary);
+}
+
+.security-note {
+    margin-top: 20px;
+}
+
+/* ANIMACIONES */
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* DISEÑO RESPONSIVO */
+
+@media (max-width: 850px) {
+
+    .payment-card {
+        grid-template-columns: 1fr;
+        max-width: 560px;
+    }
+
+    .left-side,
+    .right-side {
+        padding: 30px;
+    }
+
+    .left-side h1 {
+        font-size: 27px;
+    }
+
+    .virtual-card {
+        max-width: 420px;
+        margin: 30px auto;
+    }
+
+}
+
+@media (max-width: 420px) {
+
+    .payment-container {
+        padding: 15px;
+    }
+
+    .left-side,
+    .right-side,
+    .success-card {
+        padding: 22px;
+    }
+
+    .virtual-card {
+        padding: 18px;
+    }
+
+    .card-number {
+        font-size: 17px;
+        letter-spacing: 2px;
+    }
+
+    .card-bottom strong {
+        font-size: 10px;
+    }
+
+    .card-bottom i {
+        font-size: 24px;
+    }
+
+    .summary {
+        padding: 17px;
+    }
+
+    .success-amount {
+        font-size: 29px;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+
 }

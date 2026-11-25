@@ -1,4 +1,6 @@
 <?php
+http_response_code(410);
+exit('Servicio deshabilitado en modo demostracion.');
 require_once __DIR__ . '/config/firebase.php';
 
 use Kreait\Firebase\Database\Transaction;
